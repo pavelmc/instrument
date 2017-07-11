@@ -45,51 +45,14 @@ void printLevelmV() {
     // load the value to the temp buffer
     ltoa(p, t, DEC);
 
+    // prep the print buffer up to 65
     byte l = strlen(t);
-
-    switch (l) {
-        case 5:
-            // "3.450.6 mv
-            strncat(f, &t[0], 1);
-            strcat(f, ".");
-            strncat(f, &t[1], 3);
-            strcat(f, ".");
-            strncat(f, &t[4], 1);
-            break;
-
-        case 4:
-            // "  450.6 mv
-            strncat(f, &empty[0], 2);
-            strncat(f, &t[0], 3);
-            strcat(f, ".");
-            strncat(f, &t[3], 1);
-            break;
-
-        case 3:
-            // "   50.6 mv
-            strncat(f, &empty[0], 3);
-            strncat(f, &t[0], 2);
-            strcat(f, ".");
-            strncat(f, &t[2], 1);
-            break;
-
-        case 2:
-            // "    8.5 mv
-            strncat(f, &empty[0], 4);
-            strncat(f, &t[0], 1);
-            strcat(f, ".");
-            strncat(f, &t[1], 1);
-            break;
-
-        case 1:
-            strncat(f, &empty[0], 4);
-            strncat(f, &empty[0], 2);
-            strcat(f, t);
-            break;
-    }
+    prepMeterBuffer(l);
 
     // add the mv at the end
-    strcat(f, " mV");
+    if (l < 6) strcat(f, " mV");
+    else       strcat(f, " V");
+    // 2 empty chars at the end
     strncat(f, &empty[0], 2);
 
     // set and prepare
@@ -99,4 +62,57 @@ void printLevelmV() {
 
     // print it
     tft.print(f);
+}
+
+
+// prep the f print buffer
+void prepMeterBuffer(byte l) {
+    switch (l) {
+        case 6:
+            // "65.536" u
+            strncat(f, &t[0], 2);
+            strcat(f, ".");
+            strncat(f, &t[2], 3);
+            break;
+
+        case 5:
+            // "3.450.6" mu
+            strncat(f, &t[0], 1);
+            strcat(f, ".");
+            strncat(f, &t[1], 3);
+            strcat(f, ".");
+            strncat(f, &t[4], 1);
+            break;
+
+        case 4:
+            // "  450.6" mu
+            strncat(f, &empty[0], 2);
+            strncat(f, &t[0], 3);
+            strcat(f, ".");
+            strncat(f, &t[3], 1);
+            break;
+
+        case 3:
+            // "   50.6" mu
+            strncat(f, &empty[0], 3);
+            strncat(f, &t[0], 2);
+            strcat(f, ".");
+            strncat(f, &t[2], 1);
+            break;
+
+        case 2:
+            // "    8.5" mu
+            strncat(f, &empty[0], 4);
+            strncat(f, &t[0], 1);
+            strcat(f, ".");
+            strncat(f, &t[1], 1);
+            break;
+
+        case 1:
+            // "    0.1" mu
+            strncat(f, &empty[0], 4);
+            strcat(f, "0.";
+            strcat(f, t);
+            break;
+    }
 }
