@@ -7,9 +7,12 @@ void powerMeasureAndShow() {
 
         // voltage at the load
         vrl = takeSample(ADC_L);
+        vdl = tomV(vrl, ADC_L);
 
         // print it
         printLevelmV();
+        printLevelmW();
+        printLeveldBm();
 
         // reset the next measure
         nextMeasure = millis() + MEASURE_INTERVAL;
@@ -30,38 +33,6 @@ void showMeterMode() {
 
     // step print
     stepPrint();
-}
-
-
-// print level in mV at load
-void printLevelmV() {
-    // calc
-    long p = tomV(vrl, ADC_L);
-
-    // reset the print buffers
-    memset(t, 0, sizeof(t));
-    memset(f, 0, sizeof(f));
-
-    // load the value to the temp buffer
-    ltoa(p, t, DEC);
-
-    // prep the print buffer up to 65
-    byte l = strlen(t);
-    prepMeterBuffer(l);
-
-    // add the mv at the end
-    if (l < 6) strcat(f, " mV");
-    else       strcat(f, " V");
-    // 2 empty chars at the end
-    strncat(f, &empty[0], 2);
-
-    // set and prepare
-    tft.setCursor(10, 30);
-    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
-    tft.setTextSize(4);
-
-    // print it
-    tft.print(f);
 }
 
 
@@ -111,8 +82,103 @@ void prepMeterBuffer(byte l) {
         case 1:
             // "    0.1" mu
             strncat(f, &empty[0], 4);
-            strcat(f, "0.";
+            strcat(f, "0.");
             strcat(f, t);
             break;
     }
+}
+
+
+// print level in mV at load
+void printLevelmV() {
+    // the value is expected in vrl
+
+    // reset the print buffers
+    memset(t, 0, sizeof(t));
+    memset(f, 0, sizeof(f));
+
+    // load the value to the temp buffer
+    ltoa(vdl, t, DEC);
+
+    // prep the print buffer up to 65
+    byte l = strlen(t);
+    prepMeterBuffer(l);
+
+    // add the mv at the end
+    if (l < 6) strcat(f, " mV");
+    else       strcat(f, " V");
+    // 2 empty chars at the end
+    strncat(f, &empty[0], 2);
+
+    // set and prepare
+    tft.setCursor(20, 30);
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
+    tft.setTextSize(4);
+
+    // print it
+    tft.print(f);
+}
+
+
+// print level in mW at load
+void printLevelmW() {
+    // calc
+    unsigned long p = mV2mW(vdl);
+
+    // reset the print buffers
+    memset(t, 0, sizeof(t));
+    memset(f, 0, sizeof(f));
+
+    // load the value to the temp buffer
+    ltoa(p, t, DEC);
+
+    // prep the print buffer up to 65
+    byte l = strlen(t);
+    prepMeterBuffer(l);
+
+    // add the unit, as we will measure tops 0.5W, we will
+    // use just mW
+    strcat(f, " mW");
+    // 2 empty chars at the end
+    strncat(f, &empty[0], 2);
+
+    // set and prepare
+    tft.setCursor(20, 100);
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
+    tft.setTextSize(4);
+
+    // print it
+    tft.print(f);
+}
+
+
+// print level in dBm at load
+void printLeveldBm() {
+    // calc
+    int dBm = mW2dBm(mV2mW(vdl));
+
+    // reset the print buffers
+    memset(t, 0, sizeof(t));
+    memset(f, 0, sizeof(f));
+
+    // load the value to the temp buffer
+    itoa(dBm, t, DEC);
+
+    // prep the print buffer up to 65
+    byte l = strlen(t);
+    prepMeterBuffer(l);
+
+    // add the unit, as we will measure tops 0.5W, we will
+    // use just mW
+    strcat(f, " dBm");
+    // 2 empty chars at the end
+    strncat(f, &empty[0], 2);
+
+    // set and prepare
+    tft.setCursor(20, 140);
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
+    tft.setTextSize(4);
+
+    // print it
+    tft.print(f);
 }

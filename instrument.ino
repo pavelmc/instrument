@@ -213,10 +213,16 @@ char empty[] = "     ";      // "empty" string to copy from
 #define ADC_L   3
 
 // raw vars in ADC units (0-1023)
-word vrs = 0;
-word vr50 = 0;
-word vro = 0;
-word vrl = 0;
+unsigned long vrs = 0;
+unsigned long vr50 = 0;
+unsigned long vro = 0;
+unsigned long vrl = 0;
+
+// final values in mv * 10
+unsigned long vds = 0;
+unsigned long vd50 = 0;
+unsigned long vdo = 0;
+unsigned long vdl = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
 #define ADC_SAMPLES     60

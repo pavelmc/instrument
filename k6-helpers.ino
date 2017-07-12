@@ -232,3 +232,50 @@ void trackMinMax(word val, unsigned long f) {
         maxfv = val;
     }
 }
+
+
+// convert mV * 10 to mW *10
+unsigned long mV2mW(word mv) {
+    /********************************************
+     * power is  P = V^2 / 50
+     *
+     * but as we are working in mv * 10 the formula changes to
+     *
+     * p = (v^2 / (50 * 10000))
+     *
+     * to return mW * 10
+     ********************************************/
+    // rise volts to square
+    unsigned long p = mv;
+    p *= p;
+    // divide bt 50 ohms plus correction
+    p /= 500000;
+    // now it has the power in mW * 10
+    return p;
+}
+
+
+// convert mV *10 to dBm * 10
+int mW2dBm(word mw) {
+    /************************************************
+     * dBm is 10 * log10(mw)
+     *
+     * but we areworking in mW *10, so the formula remains as is
+     *
+     * just you need to substract 10 to the result
+     *
+     * As we need dBm expressed in * 10
+     * we multiply it by 10 and convert it to int
+     ********************************************************************/
+    // calc it
+    double dbm = log10(mw) * 10;
+
+    // it has a 10 shift, move
+    dbm -= 10.0;
+
+    // move the decimal point into integer area
+    dbm *= 10.0;
+
+    // return it
+    return (int)dbm;
+}
