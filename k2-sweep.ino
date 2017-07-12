@@ -58,7 +58,7 @@ void scan_limits() {
 //
 void moveSpanUpdate(char dir) {
     // update the value
-    sspan = moveWithLimits(sspan, dir, 0, 8);
+    sspan = moveWithLimits(sspan, dir, 0, SCAN_SPANS_COUNT);
     // update the display
     printSpan();
     scan_limits();

@@ -117,7 +117,8 @@ unsigned long sweep_spans[] = {
     500000,         // 500k
     5000000,        // 5Mhz
     20000000,       // 20Mhz
-    100000000       // 100MHz
+    100000000,      // 100MHz
+    150000000,      // 100MHz
 };
 char *sweep_spans_labels[] = {
     "  400Hz",
@@ -128,8 +129,11 @@ char *sweep_spans_labels[] = {
     " 500kHz",
     " 5.0MHz",
     "20.0MHz",
-    " 100MHz"
+    " 100MHz",
+    " 150MHz",
 };
+
+#define SCAN_SPANS_COUNT    9
 
 // scan limits
 unsigned long scan_low, scan_high, sstep;
