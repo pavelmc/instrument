@@ -116,8 +116,8 @@ void makeScan() {
         //set the frequency
         setFreq(hs);
 
-        // allow a 10 msec to settle
-        delay(5);
+        // allow a time to settle
+        delay(SCAN_PAUSE);
 
         // take sample
         measure = takeSample(ADC_L);

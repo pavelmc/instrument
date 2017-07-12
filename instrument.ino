@@ -108,11 +108,6 @@ int ppm = 3670;        // this is the correction value for the si5351
 /****** SWEEP related defines and vars **************************************/
 byte sspan = 2;
 
-//~ unsigned long sweep_spans[] = { 320, 1280, 5120, 20480, 81920, 327680, 1310720,
-    //~ 10485760, 83886080};
-//~ char *sweep_spans_labels[] = { "  320Hz", "1.28kHz", "5.12kHz", "20.5kHz",
-    //~ "81.9kHz", " 328kHz", "1.31MHz", "10.5MHz", "83.8MHz"};
-
 unsigned long sweep_spans[] = {
     400,            // 400
     2000,           // 2k
@@ -136,8 +131,6 @@ char *sweep_spans_labels[] = {
     " 100MHz"
 };
 
-
-
 // scan limits
 unsigned long scan_low, scan_high, sstep;
 
@@ -145,6 +138,9 @@ unsigned long scan_low, scan_high, sstep;
 long minf, maxf;    // min/max feq values
 word minfv = 65530;
 word maxfv = 0;
+
+// the delay pause, in milli seconds after each pause
+#define SCAN_PAUSE  2
 
 
 /****** MODE related vars and defines ***************************************/
