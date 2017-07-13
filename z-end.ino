@@ -54,13 +54,8 @@ void setup() {
 
     // initialize the spi flash
     flash.begin();
-
-    // calc the max chip data available
-    unsigned long t = flash.getMaxPage() * 256UL;
-    // the 320 here is the LCD data points to show on every scan
-    flashMaxData = (word)(t / (sizeof(adat) * 320));
-    // erase chip
-    flash.eraseChip();
+    // do flash set for a few needed vars
+    flashCalcs();
 }
 
 

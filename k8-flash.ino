@@ -1,29 +1,80 @@
 
-//~ // update the fpos data from the environment and data passed
-//~ void flashPosUpdate(byte offset) {
-    //~ // absolute position
-    //~ fpos.addr =
-    //~ fpos.page = (word)(fpos.addr / 256);
-    //~ fpos.offset = (byte)(fpos.addr % 256);
-//~ }
 
-// get the actual flash position
+//flash calcs, settings for some var at setup
+void flashCalcs() {
+    // how many data object per page
+    flashDataPerPage = 256 / DATA_LEN;
+
+    // how many pages we use for a scan (320 data object)
+    flashPagesInAScan = 320 / flashDataPerPage;
+    // check if we need a few bytes of the next page
+    if ((320 % flashDataPerPage) != 0) flashPagesInAScan += 1;
+
+    // how many scans we have available with this chip
+    flashMaxScans = (word)(flash.getMaxPage() / flashPagesInAScan);
+}
+
+// calc position
+/*************************************************************************
+ * SPI flash are not the same as a EEPROM
+ * The mem is structured in data pages of 256 bytes long usually
+ * we use a W25Q32 that has a lenght of 16384 pages
+ *
+ * So data mus be write /read in a way that data doesn't write over a data page
+ * We use a trick
+ ************************************************************************/
 unsigned long getFlashPos(word index) {
-    unsigned long pos = (sizeof(adat) * 320UL * flashPosition) + ((long)index * sizeof(adat));
-    return pos;
+    // working vars
+    unsigned long pos;
+    unsigned long local;
+    long rest;
+
+    // main position for this scan slice as direct address (bytes)
+    pos = ((long)flashPosition * flashPagesInAScan) * 256;
+
+    // how many pages of 256 bytes are covered by the index
+    local = ((index / flashDataPerPage) * 256UL);
+
+    // how many data object left in the next page (* DATA_LEN)
+    rest = (long)(index % flashDataPerPage) * DATA_LEN;
+
+    // joint the slice base and the local offset & return
+    return pos + local + rest;
 }
 
-// store the
-void flashWriteData(word index) {
+
+// store it
+void flashWriteData(word index, unsigned long f) {
+    // where to write, base of the 12 bytes
+    unsigned long pos;
+    // the base address
+    pos = getFlashPos(index);
+
     // now we write
-    flash.writeAnything(getFlashPos(index), adat);
+    flash.writeLong(pos, f, false);
+    flash.writeWord(pos +  4, vdg, false);
+    flash.writeWord(pos +  6, vd50, false);
+    flash.writeWord(pos +  8, vdo, false);
+    flash.writeWord(pos + 10, vdl, false);
 }
 
 
-// retrieve
-void flashReadData(word index) {
-    // now we write
-    flash.readAnything(getFlashPos(index), adat);
+// retrieve it
+unsigned long flashReadData(word index) {
+    // where to write, base of the 12 bytes
+    unsigned long pos;
+    // the base address
+    pos = getFlashPos(index);
+
+    // now we read
+    unsigned long fout = flash.readLong(pos);
+    vdg     = flash.readWord(pos +  4);
+    vd50    = flash.readWord(pos +  6);
+    vdo     = flash.readWord(pos +  8);
+    vdl     = flash.readWord(pos + 10);
+
+    // return it
+    return fout;
 }
 
 
@@ -33,7 +84,12 @@ void flashNext() {
     flashPosition += 1;
 
     // limit fold back safe lock
-    if (flashPosition > flashMaxData) flashPosition = 0;
+    if (flashPosition > flashMaxScans) flashPosition = 0;
+
+    // erase a few pages ahead
+    // if not data can be mangled, BTDT
+    unsigned long pos = flashPosition * flashPagesInAScan * 256L;
+    flash.eraseSector(pos);
 
     // save eprom state
     saveEEPROM();

@@ -23,6 +23,7 @@ void sweep_box() {
 // print span value
 void printSpan() {
     // print span label
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
     tft.setCursor(12, 74);
     tft.setTextSize(2);
     tft.print("SPAN: ");
@@ -30,7 +31,6 @@ void printSpan() {
     // span
     tft.setCursor(80, 74);
     tft.setTextSize(2);
-    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
     tft.print(sweep_spans_labels[sspan]);
 }
 
@@ -38,16 +38,31 @@ void printSpan() {
 // scan limits
 void scan_limits() {
     long hs = (sweep_spans[sspan] / 2);
+    long tmp;
 
     // start
-    tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
-    prepFreq4Print(*mainFreq - hs, true);
+    tmp = *mainFreq - hs;
+    if (tmp < LIMI_LOW ) {
+        tft.setTextColor(ILI9340_RED, ILI9340_BLACK);
+        tmp = LIMI_LOW;
+    } else {
+        tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
+    }
+
+    prepFreq4Print(tmp, true);
     tft.setCursor(18, 94);
     tft.setTextSize(2);
     tft.print(f);
 
     // end
-    tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
+    tmp = *mainFreq + hs;
+    if (tmp > LIMI_HIGH) {
+        tft.setTextColor(ILI9340_RED, ILI9340_BLACK);
+        tmp = LIMI_HIGH;
+    } else {
+        tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
+    }
+
     prepFreq4Print(*mainFreq + hs, true);
     tft.setCursor(18, 118);
     tft.setTextSize(2);
@@ -86,14 +101,33 @@ void moveSpanUpdate(char dir) {
 void makeScan() {
     // half scan span, reused below as freq seeping
     unsigned long hs = sweep_spans[sspan] / 2;
+
     // scan step
     sstep = sweep_spans[sspan] / 320;
+
     // scan limts
     scan_low = *mainFreq - hs;
     scan_high = *mainFreq + hs;
+
+    // limits check
+    if (scan_low < *mainFreq - hs) {
+        // limit to low range
+        scan_low = LIMI_LOW;
+        // recalc step
+        sstep = ((*mainFreq + hs) - LIMI_LOW) / 320;
+    }
+
+    if (scan_high > *mainFreq + hs) {
+        // limit to low range
+        scan_high = LIMI_HIGH;
+        // recalc step
+        sstep = (LIMI_HIGH - (*mainFreq - hs)) / 320;
+    }
+
     // the var that hold the masurement
     word measure;
     word count = 0;
+
     //define last x
     word lx = 0;
 
@@ -117,25 +151,25 @@ void makeScan() {
         delay(SCAN_PAUSE);
 
         // take sample and convert it to mV
-        measure = tomV(takeSample(ADC_L), ADC_L);
+        vdl = tomV(takeSample(ADC_L), ADC_L);
 
         //track min/max
-        trackMinMax(measure, hs);
+        trackMinMax(vdl, hs);
 
         // update data to save
-        adat.freq = hs;
-        adat.gen = 0;
-        adat.r50 = 0;
-        adat.out = 0;
-        adat.load = measure;
+        vdg     = 0;
+        vd50    = 0;
+        vdo     = 0;
+        //~ vdl     = measure;  // update above
 
         // write to FLASH
-        flashWriteData(count);
+        flashWriteData(count, hs);
 
         // count increase
         count += 1;
 
         // we need to update the bar here, TODO
+        tft.fillRect(0, 140, count, 5, ILI9340_GREEN);
     }
 
 
@@ -143,35 +177,43 @@ void makeScan() {
     drawbars();
 
     // print serial headers
-    Serial.print("freq;mv (");
-    Serial.print(flashPosition);
-    Serial.println(")");
+    Serial.println("freq;mv");
 
     // calculate the range for the display
-    word rangeEdges = ((maxfv - minfv) / 100) * 15;   // 15% increase either side
+    word rangeEdges = (word)(((long)maxfv - minfv) * 15L) / 100;   // 15% increase either side
     // calc min/max
-    int tftmin = minfv - rangeEdges;
+    int tftmin = (int)minfv - rangeEdges;
+    // min limit
     if (tftmin < 0) tftmin = 0;
+    // max limit
     word tftmax = maxfv + rangeEdges;
+    // check for low limit
+    if ((tftmax - tftmin) < 240) {
+        // reset tft limits to a more confortable view
+        if (tftmin > 120) tftmin -= 100;
+        tftmax = minfv + 140;
+    }
 
     // draw and spit via serial
-    for (count = 0; count < 320; count++) {
+    for (word i = 0; i < 320; i++) {
         // read the value from FLASH
-        flashReadData(count);
+        hs = flashReadData(i);
 
         // scale the masurement against min/max plus edges
-        //~ measure = map(adat.load, (word)tftmin, tftmax, 0, 240);
-        measure = map(adat.load, 0, 2000, 0, 240);
+        measure = map(vdl, tftmin, tftmax, 0, 240);
+        //measure = map(vdl, 0, 2000, 0, 240);
 
         // draw the lines
-        tft.drawLine(count -1 , (240 - lx), count, (240 - measure), ILI9340_CYAN);
+        tft.drawLine(i - 1 , (240 - lx), i, (240 - measure), ILI9340_CYAN);
         // prepare for next cycle
         lx = measure;
 
         // spit it out by serial
-        Serial.print(adat.freq);
+        Serial.print(i);
         Serial.print(";");
-        Serial.println(adat.load);
+        Serial.print(hs);
+        Serial.print(";");
+        Serial.println(vdl);
     }
 
     // print min max
@@ -188,7 +230,7 @@ void makeScan() {
     memset(f, 0, sizeof(f));
     memset(t, 0, sizeof(t));
     strcat(f, "(");
-    ltoa(minfv, t, DEC);
+    itoa(minfv, t, DEC);
     strcat(f, t);
     strcat(f, ")");
     tft.print(f);
@@ -206,7 +248,7 @@ void makeScan() {
     memset(f, 0, sizeof(f));
     memset(t, 0, sizeof(t));
     strcat(f, "(");
-    ltoa(maxfv, t, DEC);
+    itoa(maxfv, t, DEC);
     strcat(f, t);
     strcat(f, ")");
     tft.print(f);

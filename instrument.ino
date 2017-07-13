@@ -134,18 +134,12 @@ word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
 #define SCAN_PAUSE  2
-
-// structured data, used to read/write to the flash
-struct flashdata {
-    unsigned long freq;     // frequency
-    word gen;               // unit developed at the generator
-    word r50;               // unit developed over the 50ohms resistor
-    word out;               // unit developed at the output
-    word load;              // unit developed on the load
-} adat;
+#define DATA_LEN    12 // bytes
 
 //declare some vars related to the spi flash
-word flashMaxData;      // the amount of data objects we has available
+byte flashDataPerPage;  // how many data object we have per page of 256 bytes
+byte flashPagesInAScan; // cuantas páginas se lleva un scan.
+word flashMaxScans;     // the amount of scans we dispose of
 word flashPosition;     // the object space in the flash at we are now
 
 
@@ -199,7 +193,7 @@ boolean confSelected = false;
 
 /****** LCD print and formatting related ************************************/
 char t[15];                 // this is a temp buffer
-char empty[] = "     ";      // "empty" string to copy from
+char empty[] = "     ";    // "empty" string to copy from
 
 
 /****** ADC related vars ******************************************************
@@ -215,16 +209,16 @@ char empty[] = "     ";      // "empty" string to copy from
 #define ADC_L   3
 
 // raw vars in ADC units (0-1023)
-unsigned long vrg = 0;
-unsigned long vr50 = 0;
-unsigned long vro = 0;
-unsigned long vrl = 0;
+word vrg = 0;
+word vr50 = 0;
+word vro = 0;
+word vrl = 0;
 
 // final values in mv * 10
-unsigned long vdg = 0;
-unsigned long vd50 = 0;
-unsigned long vdo = 0;
-unsigned long vdl = 0;
+word vdg = 0;
+word vd50 = 0;
+word vdo = 0;
+word vdl = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
 #define ADC_SAMPLES     60
