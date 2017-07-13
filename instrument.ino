@@ -47,6 +47,10 @@ Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 // Enable weak pullups in the rotary lib before inclusion
 #define ENABLE_PULLUPS
 
+// Flash memory
+#include<SPIFlash.h>        // http://github.com/???/spiflash
+SPIFlash flash(7);          // this is the PIN for the CHIP SELECT
+
 // include the libs
 #include <Rotary.h>         // https://github.com/mathertel/RotaryEncoder/
 #include <Bounce2.h>        // https://github.com/thomasfredericks/Bounce2/
@@ -70,22 +74,7 @@ Si5351mcu Si;
 
 #define VERSION 5
 
-// structured data: Main Configuration Parameters
-struct mConf {
-    byte ver = VERSION;
-    long vfoa;
-    long vfob;
-    byte step;
-    byte mode;
-    int ppm;
-};
-
-
-// declaring the main configuration variable for mem storage
-struct mConf conf;
-
 // vars
-
 
 /****** Frequency control related ******************************************/
 long vfoA = 100000000L;        // VFO A
@@ -145,6 +134,19 @@ word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
 #define SCAN_PAUSE  2
+
+// structured data, used to read/write to the flash
+struct flashdata {
+    unsigned long freq;     // frequency
+    word gen;               // unit developed at the generator
+    word r50;               // unit developed over the 50ohms resistor
+    word out;               // unit developed at the output
+    word load;              // unit developed on the load
+} adat;
+
+//declare some vars related to the spi flash
+word flashMaxData;      // the amount of data objects we has available
+word flashPosition;     // the object space in the flash at we are now
 
 
 /****** MODE related vars and defines ***************************************/
@@ -213,13 +215,13 @@ char empty[] = "     ";      // "empty" string to copy from
 #define ADC_L   3
 
 // raw vars in ADC units (0-1023)
-unsigned long vrs = 0;
+unsigned long vrg = 0;
 unsigned long vr50 = 0;
 unsigned long vro = 0;
 unsigned long vrl = 0;
 
 // final values in mv * 10
-unsigned long vds = 0;
+unsigned long vdg = 0;
 unsigned long vd50 = 0;
 unsigned long vdo = 0;
 unsigned long vdl = 0;
@@ -243,16 +245,18 @@ unsigned long vdl = 0;
     float AD_b=-83.49;
 #else
     // vars related to diode measurements
-    word vsrs = 0;
+    word vsrg = 0;
     word vsr50 = 0;
     word vsro = 0;
     word vsrl = 0;
 #endif
 
 
-/***** moeter mode vars and defines ******************************************/
+/***** meter mode vars and defines ******************************************/
 #define MEASURE_INTERVAL    250     // msecs
 unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
+
+//
 
 
 // the encoder need to move

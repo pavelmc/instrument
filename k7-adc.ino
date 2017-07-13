@@ -4,7 +4,7 @@ void takeADCSamples() {
     // cycle in the samplings
 
     // voltage at the source point
-    vrs = takeSample(ADC_S);
+    vrg = takeSample(ADC_S);
 
     // voltage at the 50 ohms resistor
     vr50 = takeSample(ADC_50);
@@ -63,8 +63,8 @@ word tomV(word value, byte adc) {
 
     switch (adc) {
         case ADC_S:
-            if (value >= vsrs)
-                corrected = value - vsrs;
+            if (value >= vsrg)
+                corrected = value - vsrg;
             else
                 corrected = 0;
 
@@ -110,7 +110,7 @@ void setDiodeOffset() {
     takeADCSamples();
 
     //update the vars
-    vsrs    = vrs;
+    vsrg    = vrg;
     vsr50   = vr50;
     vsro    = vro;
     vsrl    = vrl;

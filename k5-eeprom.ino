@@ -1,4 +1,19 @@
 
+// structured data: Main Configuration Parameters
+struct mConf {
+    byte ver = VERSION;
+    long vfoa;
+    long vfob;
+    byte step;
+    byte mode;
+    int ppm;
+    word flashPosition;
+};
+
+// declaring the main configuration variable for mem storage
+struct mConf conf;
+
+
 // check if the EEPROM is initialized
 void checkInitEEPROM() {
     // read the eeprom config data
@@ -22,11 +37,12 @@ void checkInitEEPROM() {
 void saveEEPROM() {
     // load the parameters in the environment
     // conf.ver = VERSIOON;     // no need to, this is the default
-    conf.vfoa = vfoA;
-    conf.vfob = vfoB;
-    conf.step = step;
-    conf.mode = mode;
-    conf.ppm = ppm;
+    conf.vfoa           = vfoA;
+    conf.vfob           = vfoB;
+    conf.step           = step;
+    conf.mode           = mode;
+    conf.ppm            = ppm;
+    conf.flashPosition  = flashPosition;
 
     // write it
     EEPROM.put(0, conf);
@@ -39,9 +55,10 @@ void loadEEPROM() {
     EEPROM.get(0, conf);
 
     // load the parameters to the environment
-    vfoA        = conf.vfoa;
-    vfoB        = conf.vfob;
-    step        = conf.step;
-    mode        = conf.mode;
-    ppm         = conf.ppm;
+    vfoA            = conf.vfoa;
+    vfoB            = conf.vfob;
+    step            = conf.step;
+    mode            = conf.mode;
+    ppm             = conf.ppm;
+    flashPosition   = conf.flashPosition;
 }

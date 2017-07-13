@@ -92,7 +92,7 @@ void makeScan() {
     scan_low = *mainFreq - hs;
     scan_high = *mainFreq + hs;
     // the var that hold the masurement
-    word measure, point;
+    word measure;
     word count = 0;
     //define last x
     word lx = 0;
@@ -100,18 +100,15 @@ void makeScan() {
     // set freq at the start point
     setFreq(scan_low);
 
-    //  clean screen and draw bars
-    drawbars();
-
-    // print serial headers
-    Serial.println("freq;mv");
+    // initial scan into SPIFLASH
+    flashNext();    // increment the position
 
     // reset the low and hig parameters
     minf = maxf = scan_low;
     minfv = 65535;
     maxfv = 0;
 
-    // do the scan
+    // do the scan to flash
     for (hs = scan_low; hs < scan_high; hs += sstep) {
         //set the frequency
         setFreq(hs);
@@ -119,29 +116,62 @@ void makeScan() {
         // allow a time to settle
         delay(SCAN_PAUSE);
 
-        // take sample
-        measure = takeSample(ADC_L);
-
-        // reuse point for the mv
-        point = tomV(measure, ADC_L);
+        // take sample and convert it to mV
+        measure = tomV(takeSample(ADC_L), ADC_L);
 
         //track min/max
-        trackMinMax(point, hs);
+        trackMinMax(measure, hs);
 
-        // print the graph
-        measure = map(point, 0, 2500, 0, 240);
-        /***** this is ---> x ; -^ is y top left is 0,0  ******/
+        // update data to save
+        adat.freq = hs;
+        adat.gen = 0;
+        adat.r50 = 0;
+        adat.out = 0;
+        adat.load = measure;
+
+        // write to FLASH
+        flashWriteData(count);
+
+        // count increase
+        count += 1;
+
+        // we need to update the bar here, TODO
+    }
+
+
+    //  clean screen and draw graphic
+    drawbars();
+
+    // print serial headers
+    Serial.print("freq;mv (");
+    Serial.print(flashPosition);
+    Serial.println(")");
+
+    // calculate the range for the display
+    word rangeEdges = ((maxfv - minfv) / 100) * 15;   // 15% increase either side
+    // calc min/max
+    int tftmin = minfv - rangeEdges;
+    if (tftmin < 0) tftmin = 0;
+    word tftmax = maxfv + rangeEdges;
+
+    // draw and spit via serial
+    for (count = 0; count < 320; count++) {
+        // read the value from FLASH
+        flashReadData(count);
+
+        // scale the masurement against min/max plus edges
+        //~ measure = map(adat.load, (word)tftmin, tftmax, 0, 240);
+        measure = map(adat.load, 0, 2000, 0, 240);
+
+        // draw the lines
         tft.drawLine(count -1 , (240 - lx), count, (240 - measure), ILI9340_CYAN);
         // prepare for next cycle
         lx = measure;
 
-        // convert it to mV and spill it out by serial
-        Serial.print(hs);
+        // spit it out by serial
+        Serial.print(adat.freq);
         Serial.print(";");
-        Serial.println(point);
-
-        // count increase
-        count += 1;
+        Serial.println(adat.load);
     }
 
     // print min max
