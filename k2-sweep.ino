@@ -209,8 +209,6 @@ void makeScan() {
         lx = measure;
 
         // spit it out by serial
-        Serial.print(i);
-        Serial.print(";");
         Serial.print(hs);
         Serial.print(";");
         Serial.println(vdl);
