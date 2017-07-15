@@ -1,5 +1,8 @@
 /***************************************************
  * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
  ****************************************************/
 
 #include "SPI.h"
@@ -7,7 +10,7 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9340.h"
 
-// These are the pins used for the UNO
+// These are the pins used for SPI comms in the UNO
 #define _sclk 13
 #define _miso 12
 #define _mosi 11
@@ -98,34 +101,41 @@ int ppm = 3670;        // this is the correction value for the si5351
 byte sspan = 2;
 
 unsigned long sweep_spans[] = {
-    400,            // 400
-    2000,           // 2k
-    5000,           // 5k
-    20000,          // 20k
+    320,            // 320
+    1000,           // 1k
+    3000,           // 3k
+    10000,          // 10k
+    30000,          // 30k
     100000,         // 100k
-    500000,         // 500k
-    5000000,        // 5Mhz
-    20000000,       // 20Mhz
+    300000,         // 300k
+    1000000,        // 1M
+    3000000,        // 3M
+    10000000,       // 10MHz
+    30000000,       // 30MHz
     100000000,      // 100MHz
-    150000000,      // 100MHz
+    200000000       // 200MHz
+
 };
 char *sweep_spans_labels[] = {
-    "  400Hz",
-    "2.00kHz",
-    "5.00kHz",
-    "20.0kHz",
+    "  320Hz",
+    "1.00kHz",
+    "3.00kHz",
+    "10.0kHz",
+    "30.0kHz",
     " 100kHz",
-    " 500kHz",
-    " 5.0MHz",
-    "20.0MHz",
+    " 300kHz",
+    "1.00MHz",
+    "3.00MHz",
+    "10.0MHz",
+    "30.0MHz",
     " 100MHz",
-    " 150MHz",
+    " 200MHz"
 };
 
-#define SCAN_SPANS_COUNT    9
+#define SPAN_COUNT  12
 
 // scan limits
-unsigned long scan_low, scan_high, sstep;
+long scan_low, scan_high, sstep;
 
 // measure limits
 long minf, maxf;    // min/max feq values
@@ -203,10 +213,10 @@ char empty[] = "     ";    // "empty" string to copy from
  *  A3 = Vrl    voltage raw (adc) load
  *
  ******************************************************************************/
-#define ADC_S   0
-#define ADC_50  1
-#define ADC_O   2
-#define ADC_L   3
+#define ADC_S   (A0)
+#define ADC_50  (A1)
+#define ADC_O   (A2)
+#define ADC_L   (A3)
 
 // raw vars in ADC units (0-1023)
 word vrg = 0;
@@ -221,7 +231,7 @@ word vdo = 0;
 word vdl = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
-#define ADC_SAMPLES     60
+#define ADC_SAMPLES     30
 #define ADC_DIVIDER     10
 
 #define DIODES  true // we use diodes instead of AD3807 for now
@@ -249,8 +259,6 @@ word vdl = 0;
 /***** meter mode vars and defines ******************************************/
 #define MEASURE_INTERVAL    250     // msecs
 unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
-
-//
 
 
 // the encoder need to move

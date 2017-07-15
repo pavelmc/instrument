@@ -11,12 +11,12 @@ void sweep_box() {
     // lower box
     tft.drawRect(0, 68, 320, 70, ILI9340_WHITE);
 
-    // print span value
+    // update the display
+    // print span and label
     printSpan();
 
-    // print limits
+    // update the scan limits
     scan_limits();
-
 }
 
 
@@ -35,7 +35,7 @@ void printSpan() {
 }
 
 
-// scan limits
+// print scan limits
 void scan_limits() {
     long hs = (sweep_spans[sspan] / 2);
     long tmp;
@@ -70,12 +70,16 @@ void scan_limits() {
 }
 
 
-//
+// move span and update display
 void moveSpanUpdate(char dir) {
     // update the value
-    sspan = moveWithLimits(sspan, dir, 0, SCAN_SPANS_COUNT);
+    sspan = moveWithLimits(sspan, dir, 0, SPAN_COUNT);
+
     // update the display
+    // print span and label
     printSpan();
+
+    // update the scan limits
     scan_limits();
 }
 
@@ -100,7 +104,7 @@ void moveSpanUpdate(char dir) {
  *****************************************************************************/
 void makeScan() {
     // half scan span, reused below as freq seeping
-    unsigned long hs = sweep_spans[sspan] / 2;
+    long hs = sweep_spans[sspan] / 2;
 
     // scan step
     sstep = sweep_spans[sspan] / 320;
@@ -110,18 +114,18 @@ void makeScan() {
     scan_high = *mainFreq + hs;
 
     // limits check
-    if (scan_low < *mainFreq - hs) {
+    if (scan_low < LIMI_LOW) {
         // limit to low range
         scan_low = LIMI_LOW;
         // recalc step
-        sstep = ((*mainFreq + hs) - LIMI_LOW) / 320;
+        sstep = (scan_high - LIMI_LOW) / 320;
     }
 
-    if (scan_high > *mainFreq + hs) {
+    if (scan_high > LIMI_HIGH) {
         // limit to low range
         scan_high = LIMI_HIGH;
         // recalc step
-        sstep = (LIMI_HIGH - (*mainFreq - hs)) / 320;
+        sstep = (LIMI_HIGH - scan_low) / 320;
     }
 
     // the var that hold the masurement
@@ -259,11 +263,20 @@ void makeScan() {
 
 // draw bars
 void drawbars() {
+    // calc how many bars
+    byte bars = sweep_spans[sspan] % 3 ;
+    if (bars == 0)
+        // multiple of 3 = 4 bars (2 on the center)
+        bars = 3;
+    else
+        // not mutiple of 3 = 5 bars (3 on the center)
+        bars = 4;
+
     // erase the screen
     tft.fillScreen(ILI9340_BLACK);
 
     // vertical divisions
-    for (word y = 0; y < 320; y += 80)
+    for (word y = 0; y < 320; y += (320 / bars))
         tft.drawLine(y, 0, y, 240, ILI9340_WHITE);
 
     // horizontal lines
@@ -283,4 +296,10 @@ void drawbars() {
     tft.setCursor(230, 5);
     prepFreq4Print(scan_high, true);
     tft.print(f);
+
+    // print span on top
+    tft.setCursor(120, 5);
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9340_GREEN);
+    tft.print(sweep_spans_labels[sspan]);
 }

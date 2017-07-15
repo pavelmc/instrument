@@ -27,6 +27,7 @@ word takeSample(byte adc) {
     return (total / ADC_DIVIDER);
 }
 
+
 //~ // functions related to AD3805
 
 //~ // conversion to dBm from the output of a Ad3807

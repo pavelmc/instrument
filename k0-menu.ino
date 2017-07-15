@@ -67,6 +67,9 @@ void changeMode() {
             settings();
             break;
     }
+
+    // save settings
+    saveEEPROM();
 }
 
 

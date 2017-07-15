@@ -2,9 +2,6 @@
 
 // function to get out of the specif option and back to menu
 void back2menu() {
-    // save settings
-    saveEEPROM();
-
     // get back to menu
     mode = 0;
     changeMode();

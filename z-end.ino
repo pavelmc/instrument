@@ -13,18 +13,23 @@ void setup() {
     dbBtnPush.attach(btnPush);
     dbBtnPush.interval(debounceInterval);
 
+    // set the analog as inputs
+    pinMode(ADC_S, INPUT);
+    pinMode(ADC_50, INPUT);
+    pinMode(ADC_O, INPUT);
+    pinMode(ADC_L, INPUT);
+
     // HVHF as output signaling hf or vhf operation
     pinMode(HFVHF, OUTPUT);
 
     // TFT settings
     tft.begin();
-    tft.fillScreen(ILI9340_BLACK);
-
-    // load new font
-    //tft.setFont(&FreeMonoBold12pt7b);
 
     // poner horizontal tipo wide screen
     tft.setRotation(3);
+
+    // clear the screen
+    tft.fillScreen(ILI9340_BLACK);
 
     // check the eeprom contents and load it
     checkInitEEPROM();
@@ -39,6 +44,12 @@ void setup() {
     Si.setFreq(0, 150000000);
     Si.setFreq(2, *mainFreq);
 
+    // explicit shutdown
+    Si.off();
+
+    // adc setups, while the Si oscillators are off
+    setDiodeOffset();
+
     // reset the PLLs
     Si.reset();
 
@@ -49,13 +60,12 @@ void setup() {
     // draw the interface
     changeMode();
 
-    // adc setuos
-    setDiodeOffset();
-
     // initialize the spi flash
     flash.begin();
+
     // do flash set for a few needed vars
     flashCalcs();
+
 }
 
 
