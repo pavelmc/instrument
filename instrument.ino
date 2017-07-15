@@ -89,7 +89,7 @@ char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
 
 // define the mixing xtal and jumping
-#define XFO_FREQ    200000000   // 200 Mhz
+#define XFO_FREQ    220000000   // 200 Mhz
 #define SW_FREQ     100000000   // 100 Mhz
 
 // limits
