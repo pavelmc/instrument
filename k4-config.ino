@@ -76,8 +76,7 @@ void subSettings() {
 // show the ppm value
 void showPPM() {
     // reset the print buffers
-    memset(t, 0, sizeof(t));
-    memset(f, 0, sizeof(f));
+    cleanPrintbuffer();
 
     // load the value to the temp buffer
     itoa(ppm, t, DEC);

@@ -59,14 +59,21 @@ void drawtopbox() {
 }
 
 
+// clean the print buffer
+void cleanPrintbuffer() {
+    // reset the print buffers
+    memset(t, 0, sizeof(t));
+    memset(f, 0, sizeof(f));
+}
+
+
 // prepare the freq for printing
 void prepFreq4Print(long fr, boolean doHz) {
     // temp vars
     byte l = 0;
 
     // clear the buffers
-    memset(f, 0, sizeof(f));
-    memset(t, 0, sizeof(t));
+    cleanPrintbuffer();
 
     // load the freq to the temp buffer
     ltoa(fr, t, DEC);
@@ -120,6 +127,65 @@ void prepFreq4Print(long fr, boolean doHz) {
 
     // check if Hz
     if (doHz == true) strcat(f, "Hz");
+}
+
+
+/******************************************************************************
+ * Prep value for print, for unit not freq
+ *
+ * This one assume that:
+ *      - The value is loaded at t[]
+ *      - The result will be placed at f[]
+ *****************************************************************************/
+void prepValue4Print(byte l) {
+    switch (l) {
+        case 6:
+            // "65.536" u
+            strncat(f, &t[0], 2);
+            strcat(f, ".");
+            strncat(f, &t[2], 3);
+            break;
+
+        case 5:
+            // "3.450.6" mu
+            strncat(f, &t[0], 1);
+            strcat(f, ".");
+            strncat(f, &t[1], 3);
+            strcat(f, ".");
+            strncat(f, &t[4], 1);
+            break;
+
+        case 4:
+            // "  450.6" mu
+            strncat(f, &empty[0], 2);
+            strncat(f, &t[0], 3);
+            strcat(f, ".");
+            strncat(f, &t[3], 1);
+            break;
+
+        case 3:
+            // "   50.6" mu
+            strncat(f, &empty[0], 3);
+            strncat(f, &t[0], 2);
+            strcat(f, ".");
+            strncat(f, &t[2], 1);
+            break;
+
+        case 2:
+            // "    8.5" mu
+            strncat(f, &empty[0], 4);
+            strncat(f, &t[0], 1);
+            strcat(f, ".");
+            strncat(f, &t[1], 1);
+            break;
+
+        case 1:
+            // "    0.1" mu
+            strncat(f, &empty[0], 4);
+            strcat(f, "0.");
+            strcat(f, t);
+            break;
+    }
 }
 
 
@@ -231,6 +297,30 @@ void trackMinMax(word val, unsigned long f) {
         maxf = f;
         maxfv = val;
     }
+}
+
+
+// convert adc units to rel mVolts (mV * 10)
+// 1 V = 10000 aka /10000 for V
+word tomV(word value, bool load = false) {
+    // local vars
+    word corrected;
+    unsigned long tmp;
+
+    // correct the reading in the case of the load
+    if (load == true) {
+        // ward for value slower than 0 on the result
+        if (vlo > value)   value = 0;
+        else                value -= vlo;
+    }
+
+    // now convert it to mv * 10
+    tmp = value;
+    tmp *= 50000L;
+    tmp /= ((ADC_SAMPLES / ADC_DIVIDER) * 1023);
+
+    // return it
+    return (word)tmp;
 }
 
 

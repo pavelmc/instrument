@@ -154,17 +154,12 @@ void makeScan() {
         // allow a time to settle
         delay(SCAN_PAUSE);
 
-        // take sample and convert it to mV
-        vdl = tomV(takeSample(ADC_L), ADC_L);
+        // take samples and convert it to mV
+        takeADCSamples();
 
         //track min/max
-        trackMinMax(vdl, hs);
+        trackMinMax(vl, hs);
 
-        // update data to save
-        vdg     = 0;
-        vd50    = 0;
-        vdo     = 0;
-        //~ vdl     = measure;  // update above
 
         // write to FLASH
         flashWriteData(count, hs);
@@ -204,7 +199,7 @@ void makeScan() {
         hs = flashReadData(i);
 
         // scale the masurement against min/max plus edges
-        measure = map(vdl, tftmin, tftmax, 0, 240);
+        measure = map(vl, tftmin, tftmax, 0, 240);
         //measure = map(vdl, 0, 2000, 0, 240);
 
         // draw the lines
@@ -215,7 +210,7 @@ void makeScan() {
         // spit it out by serial
         Serial.print(hs);
         Serial.print(";");
-        Serial.println(vdl);
+        Serial.println(vl);
     }
 
     // print min max
@@ -229,8 +224,7 @@ void makeScan() {
     tft.print("MIN:");
     // value
     tft.setCursor(28, 215);
-    memset(f, 0, sizeof(f));
-    memset(t, 0, sizeof(t));
+    cleanPrintbuffer();
     strcat(f, "(");
     itoa(minfv, t, DEC);
     strcat(f, t);
@@ -247,8 +241,7 @@ void makeScan() {
     tft.print("MAX:");
     // value
     tft.setCursor(272, 215);
-    memset(f, 0, sizeof(f));
-    memset(t, 0, sizeof(t));
+    cleanPrintbuffer();
     strcat(f, "(");
     itoa(maxfv, t, DEC);
     strcat(f, t);

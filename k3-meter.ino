@@ -6,8 +6,7 @@ void powerMeasureAndShow() {
         // then wee need to measure
 
         // voltage at the load
-        vrl = takeSample(ADC_L);
-        vdl = tomV(vrl, ADC_L);
+        takeADCSamples();
 
         // print it
         printLevelmV();
@@ -36,73 +35,19 @@ void showMeterMode() {
 }
 
 
-// prep the f print buffer
-void prepMeterBuffer(byte l) {
-    switch (l) {
-        case 6:
-            // "65.536" u
-            strncat(f, &t[0], 2);
-            strcat(f, ".");
-            strncat(f, &t[2], 3);
-            break;
-
-        case 5:
-            // "3.450.6" mu
-            strncat(f, &t[0], 1);
-            strcat(f, ".");
-            strncat(f, &t[1], 3);
-            strcat(f, ".");
-            strncat(f, &t[4], 1);
-            break;
-
-        case 4:
-            // "  450.6" mu
-            strncat(f, &empty[0], 2);
-            strncat(f, &t[0], 3);
-            strcat(f, ".");
-            strncat(f, &t[3], 1);
-            break;
-
-        case 3:
-            // "   50.6" mu
-            strncat(f, &empty[0], 3);
-            strncat(f, &t[0], 2);
-            strcat(f, ".");
-            strncat(f, &t[2], 1);
-            break;
-
-        case 2:
-            // "    8.5" mu
-            strncat(f, &empty[0], 4);
-            strncat(f, &t[0], 1);
-            strcat(f, ".");
-            strncat(f, &t[1], 1);
-            break;
-
-        case 1:
-            // "    0.1" mu
-            strncat(f, &empty[0], 4);
-            strcat(f, "0.");
-            strcat(f, t);
-            break;
-    }
-}
-
-
 // print level in mV at load
 void printLevelmV() {
-    // the value is expected in vrl
+    // the value is expected in vl
 
-    // reset the print buffers
-    memset(t, 0, sizeof(t));
-    memset(f, 0, sizeof(f));
+    // clan print buffers
+    cleanPrintbuffer();
 
     // load the value to the temp buffer
-    ltoa(vdl, t, DEC);
+    ltoa(vl, t, DEC);
 
-    // prep the print buffer up to 65
+    // prep the print buffer
     byte l = strlen(t);
-    prepMeterBuffer(l);
+    prepValue4Print(l);
 
     // add the mv at the end
     if (l < 6) strcat(f, " mV");
@@ -123,18 +68,16 @@ void printLevelmV() {
 // print level in mW at load
 void printLevelmW() {
     // calc
-    unsigned long p = mV2mW(vdl);
+    word mW = mV2mW(vl);
 
     // reset the print buffers
-    memset(t, 0, sizeof(t));
-    memset(f, 0, sizeof(f));
+    cleanPrintbuffer();
 
     // load the value to the temp buffer
-    ltoa(p, t, DEC);
+    ltoa(mW, t, DEC);
 
-    // prep the print buffer up to 65
-    byte l = strlen(t);
-    prepMeterBuffer(l);
+    // prep the print buffer
+    prepValue4Print(strlen(t));
 
     // add the unit, as we will measure tops 0.5W, we will
     // use just mW
@@ -155,18 +98,16 @@ void printLevelmW() {
 // print level in dBm at load
 void printLeveldBm() {
     // calc
-    int dBm = mW2dBm(mV2mW(vdl));
+    int dBm = mW2dBm(mV2mW(vl));
 
     // reset the print buffers
-    memset(t, 0, sizeof(t));
-    memset(f, 0, sizeof(f));
+    cleanPrintbuffer();
 
     // load the value to the temp buffer
     itoa(dBm, t, DEC);
 
-    // prep the print buffer up to 65
-    byte l = strlen(t);
-    prepMeterBuffer(l);
+    // prep the print buffer
+    prepValue4Print(strlen(t));
 
     // add the unit, as we will measure tops 0.5W, we will
     // use just mW

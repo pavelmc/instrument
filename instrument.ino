@@ -225,35 +225,17 @@ word vro = 0;
 word vrl = 0;
 
 // final values in mv * 10
-word vdg = 0;
-word vd50 = 0;
-word vdo = 0;
-word vdl = 0;
+word vg = 0;
+word v50 = 0;
+word vo = 0;
+word vl = 0;
+
+// special case, the load has an offset
+word vlo = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
 #define ADC_SAMPLES     30
 #define ADC_DIVIDER     10
-
-#define DIODES  true // we use diodes instead of AD3807 for now
-
-#ifndef DIODES
-    // var related to AD3807
-    // FLOAT values that holds the result of the calculations
-    float dBm = 0;      // will hold the dBm result of the adc units
-    float watt = 0;     // will hold the watt result of the dBm in the environment
-    float volts = 0;    // will hold the volts result of the dBm in the environment
-    float dBuV = 0;     // will hold the dBuV result of the dBm in the environment
-
-    // ADc conversion vars
-    float AD_a=0.09;
-    float AD_b=-83.49;
-#else
-    // vars related to diode measurements
-    word vsrg = 0;
-    word vsr50 = 0;
-    word vsro = 0;
-    word vsrl = 0;
-#endif
 
 
 /***** meter mode vars and defines ******************************************/

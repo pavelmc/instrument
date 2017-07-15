@@ -14,7 +14,14 @@ void takeADCSamples() {
 
     // voltage at the load
     vrl = takeSample(ADC_L);
+
+    // convert it to mV
+    vg  = tomV(vrg, false);
+    v50 = tomV(vr50, false);
+    vo  = tomV(vro, false);
+    vl  = tomV(vrl, true);
 }
+
 
 // take samples of one ADC at a time, using average of ADC_SAMPLES
 word takeSample(byte adc) {
@@ -50,69 +57,11 @@ word takeSample(byte adc) {
     //~ dBuV = dBm + 106.99;
 //~ }
 
-// related to diode measurements
-
-
-
-
-// convert adc units to rel mVolts (mV * 10)
-// 1 V = 10000 aka /10000 for V
-word tomV(word value, byte adc) {
-    // local vars
-    unsigned long corrected;
-    unsigned long temp;
-
-    switch (adc) {
-        case ADC_S:
-            if (value >= vsrg)
-                corrected = value - vsrg;
-            else
-                corrected = 0;
-
-            break;
-
-        case ADC_50:
-            if (value >= vsr50)
-                corrected = value - vsr50;
-            else
-                corrected = 0;
-
-            break;
-
-        case ADC_O:
-            if (value >= vsro)
-                corrected = value - vsro;
-            else
-                corrected = 0;
-
-            break;
-
-        case ADC_L:
-            if (value >= vsrl)
-                corrected = value - vsrl;
-            else
-                corrected = 0;
-
-            break;
-    }
-
-    // now convert it to mv * 10
-    temp = corrected * 50000L;
-    temp /= ((ADC_SAMPLES / ADC_DIVIDER) * 1023);
-
-    // return it
-    return (word)temp;
-}
-
-
 // read and set the base diode offsets
 void setDiodeOffset() {
     // read the data in the diodes
     takeADCSamples();
 
     //update the vars
-    vsrg    = vrg;
-    vsr50   = vr50;
-    vsro    = vro;
-    vsrl    = vrl;
+    vlo = vrl;
 }
