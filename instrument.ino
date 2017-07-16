@@ -72,8 +72,10 @@ Bounce dbBtnPush = Bounce();
 unsigned long btnDownTime = 0;
 
 // lib instantiation as "Si"
-#include "si5351mcu.h"
-Si5351mcu Si;
+//~ #include "si5351mcu.h"
+//~ Si5351mcu Si;
+#include <si5351.h> // https://github.com/etherkit/Si5351Arduino/releases/tag/v2.0.1
+Si5351 si5351;
 
 #define VERSION 5
 
@@ -143,7 +145,7 @@ word minfv = 65530;
 word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  5
+#define SCAN_PAUSE  2
 #define DATA_LEN    12 // bytes
 
 //declare some vars related to the spi flash

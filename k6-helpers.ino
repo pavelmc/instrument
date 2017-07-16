@@ -225,7 +225,8 @@ void setFreq(unsigned long f) {
     // internal freq, if the freq change more than 10 Khz must reset
     static unsigned long lastResetFreq = f;
 
-    Si.setFreq(2, f);
+    //~ Si.setFreq(2, f);
+    si5351.set_freq(f * 100LL, SI5351_CLK2);
 
     //~ // we will use the mainFreq pointer as the freq to output.
     //~ if (f > SW_FREQ) {
@@ -268,7 +269,7 @@ void setFreq(unsigned long f) {
     // reset if bigger than 10k the steps
     if (abs(f - lastResetFreq) > 10000) {
         // reset
-        Si.reset();
+        //~ Si.reset();
 
         // store the new pattern
         lastResetFreq = f;
