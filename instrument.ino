@@ -143,7 +143,7 @@ word minfv = 65530;
 word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  1
+#define SCAN_PAUSE  3
 #define DATA_LEN    12 // bytes
 
 //declare some vars related to the spi flash
@@ -234,7 +234,7 @@ word vl = 0;
 word vlo = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
-#define ADC_SAMPLES     30
+#define ADC_SAMPLES     40
 #define ADC_DIVIDER     10
 
 

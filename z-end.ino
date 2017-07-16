@@ -54,7 +54,7 @@ void setup() {
     Si.reset();
 
     // enable the principal output
-    Si.setPower(2, 3);
+    Si.setPower(2, 0);
     Si.enable(2);
 
     // draw the interface
