@@ -176,7 +176,7 @@ void makeScan() {
     drawbars();
 
     // print serial headers
-    Serial.println("freq;mv");
+    Serial.println("freq;gen;50;out;load");
 
     // calculate the range for the display
     word rangeEdges = (word)(((long)maxfv - minfv) * 15L) / 100;   // 15% increase either side
@@ -207,8 +207,16 @@ void makeScan() {
         // prepare for next cycle
         lx = measure;
 
+        // "freq;gen;50;out;load"
+
         // spit it out by serial
         Serial.print(hs);
+        Serial.print(";");
+        Serial.print(vg);
+        Serial.print(";");
+        Serial.print(v50);
+        Serial.print(";");
+        Serial.print(vo);
         Serial.print(";");
         Serial.println(vl);
     }
