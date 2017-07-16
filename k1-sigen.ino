@@ -146,8 +146,8 @@ void moveVFO(char dir, bool print) {
     *mainFreq += getStep() * dir;
 
     // limit check
-    if (*mainFreq < 100000) mainFreq = 200000000;
-    if (*mainFreq > 200000000) mainFreq = 100000;
+    if (*mainFreq < LIMI_LOW) *mainFreq = LIMI_HIGH;
+    if (*mainFreq > LIMI_HIGH) *mainFreq = getStep();
 
     // update freq
     setFreq(*mainFreq);
