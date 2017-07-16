@@ -219,37 +219,24 @@ void makeScan() {
     tft.setTextSize(1);
 
     // min value
-    // label
     tft.setCursor(5, 215);
     tft.print("MIN:");
-    // value
+    minmaxSweepValue(minfv);
     tft.setCursor(28, 215);
-    cleanPrintbuffer();
-    strcat(f, "(");
-    itoa(minfv, t, DEC);
-    strcat(f, t);
-    strcat(f, ")");
     tft.print(f);
-    // freq
-    tft.setCursor(5, 225);
     prepFreq4Print(minf, true);
+    tft.setCursor(5, 225);
     tft.print(f);
 
     // max value
-    // label
-    tft.setCursor(250, 215);
+
+    tft.setCursor(230, 215);
     tft.print("MAX:");
-    // value
-    tft.setCursor(272, 215);
-    cleanPrintbuffer();
-    strcat(f, "(");
-    itoa(maxfv, t, DEC);
-    strcat(f, t);
-    strcat(f, ")");
+    minmaxSweepValue(maxfv);
+    tft.setCursor(253, 215);
     tft.print(f);
-    // freq
-    tft.setCursor(240, 225);
     prepFreq4Print(maxf, true);
+    tft.setCursor(230, 225);
     tft.print(f);
 }
 

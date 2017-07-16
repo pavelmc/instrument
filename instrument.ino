@@ -143,7 +143,7 @@ word minfv = 65530;
 word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  2
+#define SCAN_PAUSE  1
 #define DATA_LEN    12 // bytes
 
 //declare some vars related to the spi flash

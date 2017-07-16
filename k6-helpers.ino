@@ -369,3 +369,17 @@ int mW2dBm(word mw) {
     // return it
     return (int)dbm;
 }
+
+
+// process the values to show in the min/max in the sweep
+void minmaxSweepValue(word value) {
+    // reset the print buffers
+    cleanPrintbuffer();
+
+    // load the value to the temp buffer and prepare the final buffer
+    itoa(value, t, DEC);
+    prepValue4Print(strlen(t));
+    strcat(f, " mV");
+
+    // ready to print in the f[] buffer
+}
