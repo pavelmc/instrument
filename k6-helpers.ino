@@ -267,13 +267,13 @@ void setFreq(unsigned long f) {
     //~ }
 
     // reset if bigger than 10k the steps
-    if (abs(f - lastResetFreq) > 10000) {
-        // reset
+    //~ if (abs(f - lastResetFreq) > 10000) {
+        //~ // reset
         //~ Si.reset();
 
-        // store the new pattern
-        lastResetFreq = f;
-    }
+        //~ // store the new pattern
+        //~ lastResetFreq = f;
+    //~ }
 }
 
 

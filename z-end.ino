@@ -65,6 +65,7 @@ void setup() {
     si5351.output_enable(SI5351_CLK1, 0);
     si5351.output_enable(SI5351_CLK2, 1);
     si5351.set_freq(500000000L , SI5351_CLK2);
+    si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);
 
     // draw the interface
     changeMode();
