@@ -3,23 +3,23 @@
 void takeADCSamples() {
     // cycle in the samplings
 
-    // voltage at the source point
-    vrg = takeSample(ADC_S);
+    //~ // voltage at the source point
+    //~ vrg = ;
 
-    // voltage at the 50 ohms resistor
-    vr50 = takeSample(ADC_50);
+    //~ // voltage at the 50 ohms resistor
+    //~ vr50 = takeSample(ADC_50);
 
-    // voltage at the output of the sensor
-    vro = takeSample(ADC_O);
+    //~ // voltage at the output of the sensor
+    //~ vro = takeSample(ADC_O);
 
     // voltage at the load
     vrl = takeSample(ADC_L);
 
     // convert it to mV
-    vg  = tomV(vrg, false);
-    v50 = tomV(vr50, false);
-    vo  = tomV(vro, false);
-    vl  = tomV(vrl, true);
+    //~ vg  = tomV(takeSample(ADC_S), false);
+    //~ v50 = tomV(vr50, false);
+    //~ vo  = tomV(vro, false);
+    vl  = tomV(vrl, false);
 }
 
 
@@ -56,12 +56,3 @@ word takeSample(byte adc) {
     //~ //
     //~ dBuV = dBm + 106.99;
 //~ }
-
-// read and set the base diode offsets
-void setDiodeOffset() {
-    // read the data in the diodes
-    takeADCSamples();
-
-    //update the vars
-    vlo = vrl;
-}

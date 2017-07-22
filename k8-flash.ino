@@ -52,9 +52,9 @@ void flashWriteData(word index, unsigned long f) {
 
     // now we write
     flash.writeLong(pos, f, false);
-    flash.writeWord(pos +  4, vg, false);
-    flash.writeWord(pos +  6, v50, false);
-    flash.writeWord(pos +  8, vo, false);
+    //~ flash.writeWord(pos +  4, vg, false);
+    //~ flash.writeWord(pos +  6, v50, false);
+    //~ flash.writeWord(pos +  8, vo, false);
     flash.writeWord(pos + 10, vl, false);
 }
 
@@ -68,9 +68,9 @@ unsigned long flashReadData(word index) {
 
     // now we read
     unsigned long fout = flash.readLong(pos);
-    vg     = flash.readWord(pos +  4);
-    v50    = flash.readWord(pos +  6);
-    vo     = flash.readWord(pos +  8);
+    //~ vg     = flash.readWord(pos +  4);
+    //~ v50    = flash.readWord(pos +  6);
+    //~ vo     = flash.readWord(pos +  8);
     vl     = flash.readWord(pos + 10);
 
     // return it

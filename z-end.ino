@@ -2,7 +2,7 @@
 // setup
 void setup() {
     // serial int
-    Serial.begin(115200);
+    Serial.begin(230400);   // 1/4 Mbps
 
     // frequency pointer settings
     mainFreq = &vfoA;     // main freq, the one it's used now
@@ -34,38 +34,18 @@ void setup() {
     // check the eeprom contents and load it
     checkInitEEPROM();
 
-    // adc setups, while the Si oscillators are off
-    setDiodeOffset();
+    // Si5351 start up
+    Si.init();
 
-    //~ // Si5351 start up
-    //~ Si.init();
+    // set & apply my calculated correction factor
+    Si.correction(ppm);
 
-    //~ // set & apply my calculated correction factor
-    //~ Si.correction(ppm);
+    // set power
+    Si.setPower(0, 0);
+    //Si.setPower(2, 0);
 
-    //~ // pre-load some sweet spot freqs
-    //~ Si.setFreq(0, 150000000);
-    //~ Si.setFreq(2, *mainFreq);
-
-    //~ // explicit shutdown
-    //~ Si.off();
-
-    //~ // reset the PLLs
-    //~ Si.reset();
-
-    //~ // enable the principal output
-    //~ Si.setPower(2, 3);
-    //~ Si.enable(2);
-
-    //initialize the SI5351
-    si5351.init(SI5351_CRYSTAL_LOAD_8PF, 27000000L, 0);
-    si5351.set_pll(SI5351_PLL_FIXED, SI5351_PLLA);
-    si5351.set_pll(SI5351_PLL_FIXED, SI5351_PLLB);
-    si5351.output_enable(SI5351_CLK0, 0);
-    si5351.output_enable(SI5351_CLK1, 0);
-    si5351.output_enable(SI5351_CLK2, 1);
-    si5351.set_freq(500000000L , SI5351_CLK2);
-    si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);
+    // pre-load the output freq
+    setFreq(vfoA);
 
     // draw the interface
     changeMode();
@@ -75,6 +55,15 @@ void setup() {
 
     // do flash set for a few needed vars
     flashCalcs();
+
+    // analog buttons settings
+    abm.init(ANALOG_PIN, 5, 20);
+
+    // add buttons
+    abm.add(bMENU);
+    abm.add(bMAGIC);
+    abm.add(bLEFT);
+    abm.add(bRIGHT);
 }
 
 

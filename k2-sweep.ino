@@ -63,7 +63,7 @@ void scan_limits() {
         tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
     }
 
-    prepFreq4Print(*mainFreq + hs, true);
+    prepFreq4Print(tmp, true);
     tft.setCursor(18, 118);
     tft.setTextSize(2);
     tft.print(f);
@@ -135,16 +135,8 @@ void makeScan() {
     //define last x
     word lx = 0;
 
-    // set freq at the start point
-    setFreq(scan_low);
-
     // initial scan into SPIFLASH
     flashNext();    // increment the position
-
-    // reset the low and hig parameters
-    minf = maxf = scan_low;
-    minfv = 65535;
-    maxfv = 0;
 
     // do the scan to flash
     for (hs = scan_low; hs < scan_high; hs += sstep) {
@@ -157,9 +149,17 @@ void makeScan() {
         // take samples and convert it to mV
         takeADCSamples();
 
+        // start point settings at first time
+        if (hs == scan_low) {
+            // reset the low and hig parameters
+            minf = maxf = scan_low;
+
+            // set min/max to this parameter
+            minfv = maxfv = vl;
+        }
+
         //track min/max
         trackMinMax(vl, hs);
-
 
         // write to FLASH
         flashWriteData(count, hs);
@@ -171,27 +171,36 @@ void makeScan() {
         tft.fillRect(0, 140, count, 5, ILI9340_GREEN);
     }
 
+    // calculate the range for the display
+    word span = maxfv - minfv;
+
+    // 15% increase either side
+    word rangeEdges = (word)((span * 15L) / 100);
+
+    // calc min/max
+    word tftmin;
+    if (rangeEdges > minfv)    tftmin = 0;     // no pude ser menor que cero
+    else    tftmin = minfv - rangeEdges;
+
+    // max limit
+    word tftmax = (word)(maxfv + rangeEdges);
+
+    // new span with +/-15%
+    span = tftmax - tftmin;
+
+    // check for low limit
+    if (span < 180) {
+        // reset tft limits to a more confortable view
+        if (tftmin > 60) tftmin -= 60;
+        // whatever tftmin is tftmax if 240 above it.
+        tftmax = 240 - minfv;
+    }
 
     //  clean screen and draw graphic
     drawbars();
 
     // print serial headers
-    Serial.println("freq;gen;50;out;load");
-
-    // calculate the range for the display
-    word rangeEdges = (word)(((long)maxfv - minfv) * 15L) / 100;   // 15% increase either side
-    // calc min/max
-    int tftmin = (int)minfv - rangeEdges;
-    // min limit
-    if (tftmin < 0) tftmin = 0;
-    // max limit
-    word tftmax = maxfv + rangeEdges;
-    // check for low limit
-    if ((tftmax - tftmin) < 240) {
-        // reset tft limits to a more confortable view
-        if (tftmin > 120) tftmin -= 100;
-        tftmax = minfv + 140;
-    }
+    Serial.println("freq;load");
 
     // draw and spit via serial
     for (word i = 0; i < 320; i++) {
@@ -200,23 +209,18 @@ void makeScan() {
 
         // scale the masurement against min/max plus edges
         measure = map(vl, tftmin, tftmax, 0, 240);
-        //measure = map(vdl, 0, 2000, 0, 240);
 
         // draw the lines
-        tft.drawLine(i - 1 , (240 - lx), i, (240 - measure), ILI9340_CYAN);
+        if (i > 0) {
+            // draw the line just in the second step, as the first will be down
+            tft.drawLine(i - 1 , (240 - lx), i, (240 - measure), ILI9340_CYAN);
+        }
+
         // prepare for next cycle
         lx = measure;
 
-        // "freq;gen;50;out;load"
-
-        // spit it out by serial
+        // "freq;load"
         Serial.print(hs);
-        Serial.print(";");
-        Serial.print(vg);
-        Serial.print(";");
-        Serial.print(v50);
-        Serial.print(";");
-        Serial.print(vo);
         Serial.print(";");
         Serial.println(vl);
     }

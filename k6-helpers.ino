@@ -1,13 +1,5 @@
 
 
-// function to get out of the specif option and back to menu
-void back2menu() {
-    // get back to menu
-    mode = 0;
-    changeMode();
-}
-
-
 // return the actual step
 long getStep() {
     // we get the step from the global step var
@@ -225,55 +217,18 @@ void setFreq(unsigned long f) {
     // internal freq, if the freq change more than 10 Khz must reset
     static unsigned long lastResetFreq = f;
 
-    //~ Si.setFreq(2, f);
-    si5351.set_freq(f * 100LL, SI5351_CLK2);
-
-    //~ // we will use the mainFreq pointer as the freq to output.
-    //~ if (f > SW_FREQ) {
-        //~ // above 100
-
-        //~ // check if we are already there or need to change
-        //~ if (band == HF) {
-            //~ // no need to use the mixin
-            //~ digitalWrite(HFVHF, 0);
-
-            //~ // shut down the 220 Mhz reference
-            //~ Si.disable(0);
-
-            //~ // reset the band flag
-            //~ band = VHF;
-        //~ }
-
-        //~ // set the freq on the correct out
-
-    //~ } else {
-        //~ // below 100 Mhz
-
-        //~ // check if we are already there or need to change
-        //~ if (band == VHF) {
-            //~ // need to use the mixin
-            //~ digitalWrite(HFVHF, 1);
-
-            //~ // start the 220 Mhz reference
-            //~ Si.enable(0);
-
-            //~ // reset the band flag
-            //~ band = HF;
-        //~ }
-
-        //~ // set the freq on the correct out
-        //~ long nf = XFO_FREQ - f;
-        //~ Si.setFreq(2, nf);
-    //~ }
+    Si.setFreq(2, f);
+    Si.setFreq(0, f - VFO_OFFSET);
 
     // reset if bigger than 10k the steps
-    //~ if (abs(f - lastResetFreq) > 10000) {
-        //~ // reset
-        //~ Si.reset();
+    if (abs(f - lastResetFreq) > 10000) {
+        // reset
+        Si.resetPll(1);
+        Si.resetPll(0);
 
-        //~ // store the new pattern
-        //~ lastResetFreq = f;
-    //~ }
+        // store the new pattern
+        lastResetFreq = f;
+    }
 }
 
 
@@ -378,9 +333,31 @@ void minmaxSweepValue(word value) {
     cleanPrintbuffer();
 
     // load the value to the temp buffer and prepare the final buffer
-    itoa(value, t, DEC);
+    ltoa(value, t, DEC);
     prepValue4Print(strlen(t));
-    strcat(f, " mV");
+    //strcat(f, " mV");
 
     // ready to print in the f[] buffer
+}
+
+
+// calc SWR * 10
+word swr(word vfwd, word vrev) {
+    long up = vfwd;
+
+    // case 1:1
+    if (vrev == vfwd) {
+        return (word)10;
+    } else {
+        if (vfwd < vrev) {
+            up = vrev;
+            vrev = vfwd;
+        }
+
+        up += vrev;
+        up *= 10;
+        up /= (up - vrev);
+
+        return (word)up;
+    }
 }
