@@ -2,7 +2,7 @@
 // setup
 void setup() {
     // serial int
-    Serial.begin(115200);
+    Serial.begin(230400);   // 1/4 Mbps
 
     // frequency pointer settings
     mainFreq = &vfoA;     // main freq, the one it's used now
@@ -40,22 +40,12 @@ void setup() {
     // set & apply my calculated correction factor
     Si.correction(ppm);
 
-    // pre-load some sweet spot freqs
-    Si.setFreq(0, 150000000);
-    Si.setFreq(2, *mainFreq);
-
-    // explicit shutdown
-    Si.off();
-
-    // adc setups, while the Si oscillators are off
-    setDiodeOffset();
-
-    // reset the PLLs
-    Si.reset();
-
-    // enable the principal output
+    // set power
+    Si.setPower(0, 0);
     Si.setPower(2, 0);
-    Si.enable(2);
+
+    // pre-load the output freq
+    setFreq(vfoA);
 
     // draw the interface
     changeMode();
@@ -66,6 +56,14 @@ void setup() {
     // do flash set for a few needed vars
     flashCalcs();
 
+    // analog buttons settings
+    abm.init(ANALOG_PIN, 5, 20);
+
+    // add buttons
+    abm.add(bMENU);
+    abm.add(bMAGIC);
+    abm.add(bLEFT);
+    abm.add(bRIGHT);
 }
 
 

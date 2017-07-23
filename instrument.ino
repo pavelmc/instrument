@@ -72,12 +72,28 @@ Bounce dbBtnPush = Bounce();
 unsigned long btnDownTime = 0;
 
 // lib instantiation as "Si"
-#include "si5351mcu.h"
-Si5351mcu Si;
+//~ #include "si5351mcu.h"
+//~ Si5351mcu Si;
+#include <si5351light.h> // https://github.com/etherkit/Si5351Arduino/releases/tag/v2.0.1
+Si5351light Si;
 
+// analog buttons
+#define BUTTONS_COUNT 8     // just 4 buttons
+#include <BMux.h>
+#define ANALOG_PIN A0
+
+// Creating the AnalogButtons2 instance;
+// 5 msec of debounce and 20 units of tolerance
+BMux abm;
+
+
+/****** VERSION INFORMATION ***********************/
 #define VERSION 5
 
 // vars
+
+// this is the IF at 500kc with a polosa filter
+#define VFO_OFFSET      455000  //  455kHz
 
 /****** Frequency control related ******************************************/
 long vfoA = 100000000L;        // VFO A
@@ -89,12 +105,9 @@ char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
 
 // define the mixing xtal and jumping
-#define XFO_FREQ    220000000   // 200 Mhz
-#define SW_FREQ     100000000   // 100 Mhz
-
 // limits
-#define LIMI_LOW       100000   // 100 Khz
-#define LIMI_HIGH   224000000   // 100 Khz
+#define LIMI_LOW      1000000   // 1 Mhz
+#define LIMI_HIGH   122000000   // 100 Khz
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -143,7 +156,7 @@ word minfv = 65530;
 word maxfv = 0;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  3
+#define SCAN_PAUSE  2
 #define DATA_LEN    12 // bytes
 
 //declare some vars related to the spi flash
@@ -234,7 +247,7 @@ word vl = 0;
 word vlo = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
-#define ADC_SAMPLES     40
+#define ADC_SAMPLES     60
 #define ADC_DIVIDER     10
 
 
@@ -277,88 +290,11 @@ void encoderMoved(char dir) {
 }
 
 
-// check push button
-void checkPushButton() {
-    // do what you need to do in any case
-    switch (mode) {
-        case MODE_MENU:
-            // apply the new mode
-            mode = smode;
-            changeMode();
-            break;
-
-        case MODE_SIGEN:
-            // just change the step
-            changeStep();
-            break;
-
-        case MODE_SWEEP:
-            // start the scan
-            makeScan();
-            break;
-
-        case MODE_METER:
-            // do what?
-            changeStep();
-
-            break;
-
-        case MODE_CONFIG:
-            // show config menu
-            confSelected = !confSelected;
-
-            // show subsettings if 0, if 1 is return
-            if (config == 0) {
-                subSettings();
-            } else {
-                // reset selection
-                confSelected = false;
-
-                // set mode - Main Menu
-                mode = 0;
-
-                // update eeprom for the mode
-                saveEEPROM();
-
-                // draw menu
-                menu();
-            }
-
-            break;
-    }
-
-}
-
-
-// check hold button
-void checkHoldButton() {
-    // do what you need to do in any case
-    switch (mode) {
-        case MODE_SIGEN:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_SWEEP:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_METER:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_CONFIG:
-            // menu
-            back2menu();
-            break;
-    }
-}
-
-
 // check button
 void checkButton() {
+    // To check values when analog button are pressed
+    abm.check();
+
     // step button check
     if (dbBtnPush.update() == 1) {
         // button changed
