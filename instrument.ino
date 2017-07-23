@@ -290,88 +290,11 @@ void encoderMoved(char dir) {
 }
 
 
-// check push button
-void checkPushButton() {
-    // do what you need to do in any case
-    switch (mode) {
-        case MODE_MENU:
-            // apply the new mode
-            mode = smode;
-            changeMode();
-            break;
-
-        case MODE_SIGEN:
-            // just change the step
-            changeStep();
-            break;
-
-        case MODE_SWEEP:
-            // start the scan
-            makeScan();
-            break;
-
-        case MODE_METER:
-            // do what?
-            changeStep();
-
-            break;
-
-        case MODE_CONFIG:
-            // show config menu
-            confSelected = !confSelected;
-
-            // show subsettings if 0, if 1 is return
-            if (config == 0) {
-                subSettings();
-            } else {
-                // reset selection
-                confSelected = false;
-
-                // set mode - Main Menu
-                mode = 0;
-
-                // update eeprom for the mode
-                saveEEPROM();
-
-                // draw menu
-                menu();
-            }
-
-            break;
-    }
-
-}
-
-
-// check hold button
-void checkHoldButton() {
-    // do what you need to do in any case
-    switch (mode) {
-        case MODE_SIGEN:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_SWEEP:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_METER:
-            // menu
-            back2menu();
-            break;
-
-        case MODE_CONFIG:
-            // menu
-            back2menu();
-            break;
-    }
-}
-
-
 // check button
 void checkButton() {
+    // To check values when analog button are pressed
+    abm.check();
+
     // step button check
     if (dbBtnPush.update() == 1) {
         // button changed
