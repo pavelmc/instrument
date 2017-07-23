@@ -42,7 +42,7 @@ void setup() {
 
     // set power
     Si.setPower(0, 0);
-    //Si.setPower(2, 0);
+    Si.setPower(2, 0);
 
     // pre-load the output freq
     setFreq(vfoA);
@@ -56,14 +56,14 @@ void setup() {
     // do flash set for a few needed vars
     flashCalcs();
 
-    // analog buttons settings
-    abm.init(ANALOG_PIN, 5, 20);
+    //~ // analog buttons settings
+    //~ abm.init(ANALOG_PIN, 5, 20);
 
-    // add buttons
-    abm.add(bMENU);
-    abm.add(bMAGIC);
-    abm.add(bLEFT);
-    abm.add(bRIGHT);
+    //~ // add buttons
+    //~ abm.add(bMENU);
+    //~ abm.add(bMAGIC);
+    //~ abm.add(bLEFT);
+    //~ abm.add(bRIGHT);
 }
 
 

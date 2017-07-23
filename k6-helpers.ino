@@ -1,5 +1,13 @@
 
 
+// function to get out of the specif option and back to menu
+void back2menu() {
+    // get back to menu
+    mode = 0;
+    changeMode();
+}
+
+
 // return the actual step
 long getStep() {
     // we get the step from the global step var
