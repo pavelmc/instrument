@@ -249,14 +249,14 @@ void drawMainVFObox() {
 // track min/max
 void trackMinMax(word val, unsigned long f) {
     // minimum
-    if (val < minfv) {
+    if (val >= minfv) {
         // new minimum
         minf = f;
         minfv = val;
     }
 
     // maximum
-    if (val > maxfv) {
+    if (val <= maxfv) {
         // new max
         maxf = f;
         maxfv = val;
