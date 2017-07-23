@@ -22,15 +22,15 @@ long getStep() {
 
 
 // change the step
-void changeStep() {
-    // calculating the next step
-    if (step < 7) {
-        // simply increment
-        step += 1;
-    } else {
-        // reset
-        step = 0;
-    }
+void changeStep(char dir) {
+    char nstep = (char)step + dir;
+
+    // limit check
+    if (nstep > 6) nstep = 0;
+    if (nstep < 0) nstep = 6;
+
+    // update real value
+    step = (byte)nstep;
 
     // update the LCD
     stepPrint();

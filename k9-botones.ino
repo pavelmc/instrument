@@ -26,7 +26,7 @@ void checkPushButton() {
 
         case MODE_SIGEN:
             // just change the step
-            changeStep();
+            changeStep(1);
             break;
 
         case MODE_SWEEP:
@@ -36,7 +36,7 @@ void checkPushButton() {
 
         case MODE_METER:
             // do what?
-            changeStep();
+            changeStep(1);
 
             break;
 
