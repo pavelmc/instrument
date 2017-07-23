@@ -222,21 +222,9 @@ byte moveWithLimits(byte var, char dir, byte low, byte high) {
  *  CLK0 will be the 220Mhz reference.
  ***************************************************************************/
 void setFreq(unsigned long f) {
-    // internal freq, if the freq change more than 10 Khz must reset
-    static unsigned long lastResetFreq = f;
-
     Si.setFreq(2, f);
     Si.setFreq(0, f - VFO_OFFSET);
-
-    // reset if bigger than 10k the steps
-    if (abs(f - lastResetFreq) > 10000) {
-        // reset
-        Si.resetPll(1);
-        Si.resetPll(0);
-
-        // store the new pattern
-        lastResetFreq = f;
-    }
+    Si.reset();
 }
 
 

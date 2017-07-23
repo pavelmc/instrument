@@ -44,6 +44,10 @@ void setup() {
     Si.setPower(0, 0);
     Si.setPower(2, 0);
 
+    // enable outputs
+    Si.enable(0);
+    Si.enable(2);
+
     // pre-load the output freq
     setFreq(vfoA);
 

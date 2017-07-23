@@ -72,10 +72,10 @@ Bounce dbBtnPush = Bounce();
 unsigned long btnDownTime = 0;
 
 // lib instantiation as "Si"
-//~ #include "si5351mcu.h"
-//~ Si5351mcu Si;
-#include <si5351light.h> // https://github.com/etherkit/Si5351Arduino/releases/tag/v2.0.1
-Si5351light Si;
+#include "si5351mcu.h"
+Si5351mcu Si;
+//~ #include <si5351light.h> // https://github.com/etherkit/Si5351Arduino/releases/tag/v2.0.1
+//~ Si5351light Si;
 
 // analog buttons
 #define BUTTONS_COUNT 8     // just 4 buttons
@@ -107,7 +107,7 @@ int ppm = 3670;        // this is the correction value for the si5351
 // define the mixing xtal and jumping
 // limits
 #define LIMI_LOW      1000000   // 1 Mhz
-#define LIMI_HIGH   122000000   // 100 Khz
+#define LIMI_HIGH   220000000   // 100 Khz
 
 
 /****** SWEEP related defines and vars **************************************/
