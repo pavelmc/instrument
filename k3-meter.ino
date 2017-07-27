@@ -3,10 +3,10 @@
 void powerMeasureAndShow() {
     // check if we need to measure
     if (millis() > nextMeasure) {
-        // then wee need to measure
+        // then we need to measure
 
         // voltage at the load
-        takeADCSamples();
+        meterRead();
 
         // print it
         printLevelmV();
@@ -15,12 +15,6 @@ void powerMeasureAndShow() {
 
         // reset the next measure
         nextMeasure = millis() + MEASURE_INTERVAL;
-
-
-        // spit it out by serial
-        //~ Serial.print(*mainFreq);
-        //~ Serial.print(";");
-        //~ Serial.println(vl);
     }
 }
 
@@ -49,7 +43,7 @@ void printLevelmV() {
     cleanPrintbuffer();
 
     // load the value to the temp buffer
-    ltoa(vl, t, DEC);
+    ltoa(vm, t, DEC);
 
     // prep the print buffer
     byte l = strlen(t);
@@ -74,7 +68,7 @@ void printLevelmV() {
 // print level in mW at load
 void printLevelmW() {
     // calc
-    word mW = mV2mW(vl);
+    word mW = mV2mW(vm);
 
     // reset the print buffers
     cleanPrintbuffer();
@@ -104,7 +98,7 @@ void printLevelmW() {
 // print level in dBm at load
 void printLeveldBm() {
     // calc
-    int dBm = mW2dBm(mV2mW(vl));
+    int dBm = mW2dBm(mV2mW(vm));
 
     // reset the print buffers
     cleanPrintbuffer();

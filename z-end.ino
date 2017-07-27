@@ -14,9 +14,7 @@ void setup() {
     dbBtnPush.interval(debounceInterval);
 
     // set the analog as inputs
-    pinMode(ADC_S, INPUT);
-    pinMode(ADC_50, INPUT);
-    pinMode(ADC_O, INPUT);
+    pinMode(ADC_M, INPUT);
     pinMode(ADC_L, INPUT);
 
     // TFT settings
@@ -33,6 +31,10 @@ void setup() {
 
     // Si5351 start up
     Si.init();
+    Si.off();
+
+    // now we have the Si5351 off, we take the base readings for the meter
+    vbm = takeSample(ADC_M);
 
     // set & apply my calculated correction factor
     Si.correction(ppm);

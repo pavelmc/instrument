@@ -10,6 +10,20 @@ void takeADCSamples() {
     vl  = tomV(vrl);
 }
 
+// measure at the meter
+void meterRead() {
+    // take sample
+    vm = takeSample(ADC_M);
+
+    // zero or mv...
+    if (vm > vbm) {
+        // take the difference and compute it as mV
+        vm = tomV(vm -vbm);
+    } else {
+        // no go, set to zero
+        vm = 0;
+    }
+}
 
 // take samples of one ADC at a time, using average of ADC_SAMPLES
 word takeSample(byte adc) {

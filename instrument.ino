@@ -227,16 +227,16 @@ char empty[] = "     ";    // "empty" string to copy from
  *  A3 = Vrl    voltage raw (adc) load
  *
  ******************************************************************************/
-#define ADC_S   (A0)
-#define ADC_50  (A1)
-#define ADC_O   (A2)
-#define ADC_L   (A3)
+#define ADC_M   (A1)
+#define ADC_L   (A2)
 
 // raw vars in ADC units (0-1023)
 word vrl = 0;
+word vbm = 0;
 
 // final values in mv * 10
 word vl = 0;
+word vm = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
 #define ADC_SAMPLES     30  // WATCH OUT ! max = 63
