@@ -92,22 +92,22 @@ BMux abm;
 
 // vars
 
-// this is the IF at 500kc with a polosa filter
-#define VFO_OFFSET      455000  //  455kHz
+// this is the IF at 27 Mhz with a homebrew filter
+#define VFO_OFFSET      26994359        // corrected value
 
 /****** Frequency control related ******************************************/
-long vfoA = 100000000L;        // VFO A
-long vfoB =   7110000L;        // VFO B
-long *mainFreq;              // main freq, the one it's used now
-long *subFreq;               // the one in reserve
+long vfoA = 100000000L;     // VFO A
+long vfoB =   7110000L;     // VFO B
+long *mainFreq;             // main freq, the one it's used now
+long *subFreq;              // the one in reserve
 word pep[10];
 char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
 
 // define the mixing xtal and jumping
 // limits
-#define LIMI_LOW      1000000   // 1 Mhz
-#define LIMI_HIGH   220000000   // 100 Khz
+#define LIMI_LOW       100000   // 100 kHz
+#define LIMI_HIGH   220000000   // 220 MHz
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -147,17 +147,22 @@ char *sweep_spans_labels[] = {
 
 #define SPAN_COUNT  12
 
+/********************* SWEEP related vars *********************************/
 // scan limits
 long scan_low, scan_high, sstep;
 
 // measure limits
 long minf, maxf;    // min/max feq values
-word minfv = 65530;
-word maxfv = 0;
+word minv, maxv;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  2
+#define SCAN_PAUSE  3
 #define DATA_LEN    12 // bytes
+
+// vard related to -3 & -6 db points
+word dB1l, dB3l, dB6l, dB9l;    // levels for a scan, point of 1dB, 3dB, 6dB, 9dB
+
+/****************** FLASH related vars ***********************************/
 
 //declare some vars related to the spi flash
 byte flashDataPerPage;  // how many data object we have per page of 256 bytes
@@ -197,12 +202,7 @@ char *stepLabels[] = {
     " 10MHz"
 };
 
-/****** BAND data ***********************************************************/
-#define HFVHF   5      // D5 by now
-#define VHF     0
-#define HF      1
-boolean band =  0;
-
+#define STEP_COUNT  7
 
 /****** config / settings vars and define ***********************************/
 byte config = 0;
@@ -232,22 +232,13 @@ char empty[] = "     ";    // "empty" string to copy from
 #define ADC_L   (A3)
 
 // raw vars in ADC units (0-1023)
-word vrg = 0;
-word vr50 = 0;
-word vro = 0;
 word vrl = 0;
 
 // final values in mv * 10
-word vg = 0;
-word v50 = 0;
-word vo = 0;
 word vl = 0;
 
-// special case, the load has an offset
-word vlo = 0;
-
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
-#define ADC_SAMPLES     60
+#define ADC_SAMPLES     30  // WATCH OUT ! max = 63
 #define ADC_DIVIDER     10
 
 

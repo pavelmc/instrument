@@ -127,14 +127,14 @@ void bLeftClick() {
     // Go left or select next left option
     switch (mode) {
         case MODE_SIGEN:
-            // menu
+            // mover el paso detras
+            changeStep(-1);
             break;
 
         case MODE_SWEEP:
             // Set min level freq as center of the scan and
             // re do the scan
-            *mainFreq = minf;
-            makeScan();
+            makeScan2Min();
             break;
 
         case MODE_METER:
@@ -153,11 +153,13 @@ void bRightClick() {
     // Go right or select next right option
     switch (mode) {
         case MODE_SIGEN:
-            // menu
+            // mover el paso adelante
+            changeStep(1);
             break;
 
         case MODE_SWEEP:
-            // menu
+            // sef vfo to max and make a scan there
+            makeScan2Max();
             break;
 
         case MODE_METER:

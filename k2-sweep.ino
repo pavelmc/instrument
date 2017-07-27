@@ -98,8 +98,8 @@ void moveSpanUpdate(char dir) {
  * We need to define and keep account of min an max
  *      minf = freq of the minimum value
  *      maxf = freq of the maximun value
- *      minfv = min value
- *      maxfv = max value
+ *      minv = min value
+ *      maxv = max value
  *
  *****************************************************************************/
 void makeScan() {
@@ -155,7 +155,7 @@ void makeScan() {
             minf = maxf = scan_low;
 
             // set min/max to this parameter
-            minfv = maxfv = vl;
+            minv = maxv = vl;
         }
 
         //track min/max
@@ -172,18 +172,18 @@ void makeScan() {
     }
 
     // calculate the range for the display
-    word span = maxfv - minfv;
+    word span = maxv - minv;
 
     // 15% increase either side
-    word rangeEdges = (word)((span * 15L) / 100);
+    word rangeEdges = (span * 15L) / 100;
 
     // calc min/max
     word tftmin;
-    if (rangeEdges > minfv)    tftmin = 0;     // no pude ser menor que cero
-    else    tftmin = minfv - rangeEdges;
+    if (rangeEdges > minv)    tftmin = 0;     // no pude ser menor que cero
+    else    tftmin = minv - rangeEdges;
 
     // max limit
-    word tftmax = (word)(maxfv + rangeEdges);
+    word tftmax = (word)(maxv + rangeEdges);
 
     // new span with +/-15%
     span = tftmax - tftmin;
@@ -193,11 +193,18 @@ void makeScan() {
         // reset tft limits to a more confortable view
         if (tftmin > 60) tftmin -= 60;
         // whatever tftmin is tftmax if 240 above it.
-        tftmax = 240 - minfv;
+        tftmax = 240 - minv;
     }
 
+    // determine -6dB, -3dB & -1dB;
+    dB1l = (word)((long)maxv * 794 / 1000);     // -1dB aka max * 0.794
+    dB3l = maxv / 2;                            // -3dB aka max * 0.5
+    dB6l = maxv / 4;                            // -6dB aka max * 0.25
+    dB9l = maxv / 8;                            // -9dB aka max * 0.125
+    word color;
+
     //  clean screen and draw graphic
-    drawbars();
+    drawbars(tftmin, tftmax);
 
     // print serial headers
     Serial.println("freq;load");
@@ -233,7 +240,7 @@ void makeScan() {
     // min value
     tft.setCursor(5, 215);
     tft.print("MIN:");
-    minmaxSweepValue(minfv);
+    minmaxSweepValue(minv);
     tft.setCursor(28, 215);
     tft.print(f);
     prepFreq4Print(minf, true);
@@ -244,7 +251,7 @@ void makeScan() {
 
     tft.setCursor(230, 215);
     tft.print("MAX:");
-    minmaxSweepValue(maxfv);
+    minmaxSweepValue(maxv);
     tft.setCursor(253, 215);
     tft.print(f);
     prepFreq4Print(maxf, true);
@@ -254,7 +261,7 @@ void makeScan() {
 
 
 // draw bars
-void drawbars() {
+void drawbars(word tftmin, word tftmax) {
     // calc how many bars
     byte bars = sweep_spans[sspan] % 3 ;
     if (bars == 0)
@@ -272,8 +279,28 @@ void drawbars() {
         tft.drawLine(y, 0, y, 240, ILI9340_WHITE);
 
     // horizontal lines
-    for (byte x = 0; x < 240; x += 80)
-        tft.drawLine(0, x, 320, x, ILI9340_WHITE);
+    /************************************************************************
+     * We will draw lines for
+     * -1db
+     * -3db
+     * -6dB
+     * -9dB
+     ************************************************************************/
+    int dB1, dB3, dB6, dB9;
+    dB1 = map(dB1l, tftmin, tftmax, 0, 240);
+    dB3 = map(dB3l, tftmin, tftmax, 0, 240);
+    dB6 = map(dB6l, tftmin, tftmax, 0, 240);
+    dB9 = map(dB9l, tftmin, tftmax, 0, 240);
+
+    // put dB labels, if possible
+    tft.setTextColor(ILI9340_WHITE);
+    tft.setTextSize(1);
+
+    // print horizontal lines
+    printdBlines(dB1, "-1dB");
+    printdBlines(dB3, "-3dB");
+    printdBlines(dB6, "-6dB");
+    printdBlines(dB9, "-9dB");
 
     // print labels, default size and color
     tft.setTextColor(ILI9340_YELLOW);
@@ -294,4 +321,26 @@ void drawbars() {
     tft.setTextSize(2);
     tft.setTextColor(ILI9340_GREEN);
     tft.print(sweep_spans_labels[sspan]);
+}
+
+
+// print db lines
+void printdBlines(int val, char *text) {
+    if (val > 8 and val < 232) {
+        tft.drawLine(0, 240 - val, 320, 240 - val, ILI9340_WHITE);
+        tft.setCursor(290, 232 - val);
+        tft.print(text);
+    }
+}
+
+//
+void makeScan2Min() {
+    *mainFreq = minf;
+    makeScan();
+}
+
+//
+void makeScan2Max() {
+    *mainFreq = maxf;
+    makeScan();
 }

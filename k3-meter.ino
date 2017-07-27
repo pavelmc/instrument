@@ -18,15 +18,9 @@ void powerMeasureAndShow() {
 
 
         // spit it out by serial
-        Serial.print(*mainFreq);
-        Serial.print(";");
-        Serial.print(vg);
-        Serial.print(";");
-        Serial.print(v50);
-        Serial.print(";");
-        Serial.print(vo);
-        Serial.print(";");
-        Serial.println(vl);
+        //~ Serial.print(*mainFreq);
+        //~ Serial.print(";");
+        //~ Serial.println(vl);
     }
 }
 

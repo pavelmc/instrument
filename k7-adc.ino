@@ -1,25 +1,13 @@
 
 // take ADC samples and put the adc values on the environment
 void takeADCSamples() {
-    // cycle in the samplings
+    // take all ADC samples at once
 
-    //~ // voltage at the source point
-    //~ vrg = ;
-
-    //~ // voltage at the 50 ohms resistor
-    //~ vr50 = takeSample(ADC_50);
-
-    //~ // voltage at the output of the sensor
-    //~ vro = takeSample(ADC_O);
-
-    // voltage at the load
+    // so far just level
     vrl = takeSample(ADC_L);
 
     // convert it to mV
-    //~ vg  = tomV(takeSample(ADC_S), false);
-    //~ v50 = tomV(vr50, false);
-    //~ vo  = tomV(vro, false);
-    vl  = tomV(vrl, false);
+    vl  = tomV(vrl);
 }
 
 
@@ -29,7 +17,8 @@ word takeSample(byte adc) {
     word total = 0;
 
     //cycle for ADC_SAMPLES
-    for (byte i = 0; i < ADC_SAMPLES; i++) total += analogRead(adc);
+    for (byte i = 0; i < ADC_SAMPLES; i++)
+        total += analogRead(adc);
 
     return (total / ADC_DIVIDER);
 }

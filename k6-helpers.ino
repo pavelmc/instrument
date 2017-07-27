@@ -26,8 +26,8 @@ void changeStep(char dir) {
     char nstep = (char)step + dir;
 
     // limit check
-    if (nstep > 6) nstep = 0;
-    if (nstep < 0) nstep = 6;
+    if (nstep > STEP_COUNT) nstep = 0;
+    if (nstep < 0) nstep = STEP_COUNT;
 
     // update real value
     step = (byte)nstep;
@@ -222,8 +222,16 @@ byte moveWithLimits(byte var, char dir, byte low, byte high) {
  *  CLK0 will be the 220Mhz reference.
  ***************************************************************************/
 void setFreq(unsigned long f) {
+    // set main RF freq
     Si.setFreq(2, f);
-    Si.setFreq(0, f - VFO_OFFSET);
+
+    // set VFO freq to obtain a VFO_OFFSET, but
+    // - below 100 Mhz we put the VFO above
+    // - above 100 Mhz we put it below
+    if (f < 100000000)  Si.setFreq(0, f + VFO_OFFSET);
+    else                Si.setFreq(0, f - VFO_OFFSET);
+
+    // reset both PLLs
     Si.reset();
 }
 
@@ -235,40 +243,31 @@ void drawMainVFObox() {
 
 
 // track min/max
-void trackMinMax(word val, unsigned long f) {
+void trackMinMax(long val, unsigned long f) {
     // minimum
-    if (val <= minfv) {
+    if (val <= minv) {
         // new minimum
         minf = f;
-        minfv = val;
+        minv = val;
     }
 
     // maximum
-    if (val >= maxfv) {
+    if (val >= maxv) {
         // new max
         maxf = f;
-        maxfv = val;
+        maxv = val;
     }
 }
 
 
-// convert adc units to rel mVolts (mV * 10)
+// convert adc units to mVolts (mV * 10)
 // 1 V = 10000 aka /10000 for V
-word tomV(word value, bool load = false) {
+word tomV(word value) {
     // local vars
-    word corrected;
     unsigned long tmp;
 
-    // correct the reading in the case of the load
-    if (load == true) {
-        // ward for value slower than 0 on the result
-        if (vlo > value)   value = 0;
-        else                value -= vlo;
-    }
-
     // now convert it to mv * 10
-    tmp = value;
-    tmp *= 50000L;
+    tmp = value * 50000L;
     tmp /= ((ADC_SAMPLES / ADC_DIVIDER) * 1023);
 
     // return it
@@ -289,7 +288,7 @@ unsigned long mV2mW(word mv) {
      ********************************************/
     // rise volts to square
     unsigned long p = mv;
-    p *= p;
+    p = mv * p;
     // divide bt 50 ohms plus correction
     p /= 500000;
     // now it has the power in mW * 10

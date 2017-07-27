@@ -19,9 +19,6 @@ void setup() {
     pinMode(ADC_O, INPUT);
     pinMode(ADC_L, INPUT);
 
-    // HVHF as output signaling hf or vhf operation
-    pinMode(HFVHF, OUTPUT);
-
     // TFT settings
     tft.begin();
 
