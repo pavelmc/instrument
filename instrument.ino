@@ -160,7 +160,8 @@ word minv, maxv;
 #define DATA_LEN    12 // bytes
 
 // vard related to -3 & -6 db points
-word dB1l, dB3l, dB6l, dB9l;    // levels for a scan, point of 1dB, 3dB, 6dB, 9dB
+// levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
+word dB05l, dB1l, dB3l, dB6l, dB9l;
 
 /****************** FLASH related vars ***********************************/
 

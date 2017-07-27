@@ -196,11 +196,12 @@ void makeScan() {
         tftmax = 240 - minv;
     }
 
-    // determine -6dB, -3dB & -1dB;
-    dB1l = (word)((long)maxv * 794 / 1000);     // -1dB aka max * 0.794
-    dB3l = maxv / 2;                            // -3dB aka max * 0.5
-    dB6l = maxv / 4;                            // -6dB aka max * 0.25
-    dB9l = maxv / 8;                            // -9dB aka max * 0.125
+    // determine -6dB, -3dB & -1dB; 89.12
+    dB05l = (word)(maxv * 8912L / 10000);        // -0.5dB aka max * 0.8912
+    dB1l  = (word)(maxv * 794L  / 1000);          // -1dB aka max * 0.794
+    dB3l  = maxv / 2;                            // -3dB aka max * 0.5
+    dB6l  = maxv / 4;                            // -6dB aka max * 0.25
+    dB9l  = maxv / 8;                            // -9dB aka max * 0.125
     word color;
 
     //  clean screen and draw graphic
@@ -262,7 +263,7 @@ void makeScan() {
 
 // draw bars
 void drawbars(word tftmin, word tftmax) {
-    // calc how many bars
+    // calc how many vertical lines
     byte bars = sweep_spans[sspan] % 3 ;
     if (bars == 0)
         // multiple of 3 = 4 bars (2 on the center)
@@ -281,22 +282,25 @@ void drawbars(word tftmin, word tftmax) {
     // horizontal lines
     /************************************************************************
      * We will draw lines for
+     * -0.5dB
      * -1db
      * -3db
      * -6dB
      * -9dB
      ************************************************************************/
-    int dB1, dB3, dB6, dB9;
-    dB1 = map(dB1l, tftmin, tftmax, 0, 240);
-    dB3 = map(dB3l, tftmin, tftmax, 0, 240);
-    dB6 = map(dB6l, tftmin, tftmax, 0, 240);
-    dB9 = map(dB9l, tftmin, tftmax, 0, 240);
+    int dB05, dB1, dB3, dB6, dB9;
+    dB05 = map(dB05l, tftmin, tftmax, 0, 240);
+    dB1  = map(dB1l, tftmin, tftmax, 0, 240);
+    dB3  = map(dB3l, tftmin, tftmax, 0, 240);
+    dB6  = map(dB6l, tftmin, tftmax, 0, 240);
+    dB9  = map(dB9l, tftmin, tftmax, 0, 240);
 
     // put dB labels, if possible
     tft.setTextColor(ILI9340_WHITE);
     tft.setTextSize(1);
 
     // print horizontal lines
+    printdBlines(dB05, "-0.5dB");
     printdBlines(dB1, "-1dB");
     printdBlines(dB3, "-3dB");
     printdBlines(dB6, "-6dB");
@@ -328,7 +332,7 @@ void drawbars(word tftmin, word tftmax) {
 void printdBlines(int val, char *text) {
     if (val > 8 and val < 232) {
         tft.drawLine(0, 240 - val, 320, 240 - val, ILI9340_WHITE);
-        tft.setCursor(290, 232 - val);
+        tft.setCursor(282, 232 - val);
         tft.print(text);
     }
 }
