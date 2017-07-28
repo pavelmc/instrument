@@ -9,6 +9,7 @@ struct mConf {
     int ppm;
     word flashPosition;
     byte sspan;
+    long vfoOffset;
 };
 
 // declaring the main configuration variable for mem storage
@@ -45,6 +46,7 @@ void saveEEPROM() {
     conf.ppm            = ppm;
     conf.flashPosition  = flashPosition;
     conf.sspan          = sspan;
+    conf.vfoOffset      = vfoOffset;
 
     // write it
     EEPROM.put(0, conf);
@@ -64,4 +66,5 @@ void loadEEPROM() {
     ppm             = conf.ppm;
     flashPosition   = conf.flashPosition;
     sspan           = conf.sspan;
+    vfoOffset       = conf.vfoOffset;
 }

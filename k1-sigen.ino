@@ -38,11 +38,8 @@ void subFreqPrint(bool main) {
     tft.setTextSize(2);
 
     // prep freq for print
-    if (main) {
-        prepFreq4Print(*subFreq, true);
-    } else {
-        prepFreq4Print(*mainFreq, true);
-    }
+    if (main) prepFreq4Print(*subFreq, true);
+    else      prepFreq4Print(*mainFreq, true);
 
     // print it
     tft.print(f);

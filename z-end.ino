@@ -41,7 +41,7 @@ void setup() {
 
     // set power
     Si.setPower(0, 0);
-    Si.setPower(2, 0);
+    Si.setPower(2, 3);
 
     // enable outputs
     Si.enable(0);

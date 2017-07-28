@@ -2,7 +2,7 @@
 
 // draw the VFO box
 void sweep_box() {
-    // linea gruesa, aka: dos rectangulos
+    // main box
     tft.drawRect(0, 22, 320, 44, ILI9340_WHITE);
 
     // VFO Primario
@@ -337,14 +337,109 @@ void printdBlines(int val, char *text) {
     }
 }
 
+
 //
 void makeScan2Min() {
     *mainFreq = minf;
     makeScan();
 }
 
+
 //
 void makeScan2Max() {
     *mainFreq = maxf;
     makeScan();
+}
+
+
+// show the DB measurements
+void showDB() {
+    // vars
+    long fc;
+
+    //back to main interfae
+    changeMode();
+
+    // reset values
+    fdb3s = fdb3e = fdb6s = fdb6e = 0;
+    bw3db = bw6db = 0;
+
+    // update the data from the mem
+    for (word i = 0; i < 320; i++) {
+        // read the value from FLASH
+        fc = flashReadData(i);
+        // now vl has the data
+
+        // -3dB
+        if (fdb3s == 0 and vl > dB3l) fdb3s = fc;
+        if (fdb3s != 0 and fdb3e == 0 and vl < dB3l) fdb3e = fc;
+
+        // -6dB
+        if (fdb6s == 0 and vl > dB6l) fdb6s = fc;
+        if (fdb6s != 0 and fdb6e == 0 and vl < dB6l) fdb6e = fc;
+
+        // draw progress bar
+        tft.fillRect(0, 140, i, 5, ILI9340_GREEN);
+    }
+
+    // erase bar
+    tft.fillRect(0, 140, 320, 5, ILI9340_BLACK);
+
+    // calc the bandwidth of each one
+    bw3db = fdb3e - fdb3s;
+    bw6db = fdb6e - fdb6s;
+
+    /*** DEBUG ***/
+    Serial.println("3dB");
+    Serial.print(bw3db);
+    Serial.print(";");
+    Serial.print(fdb3s);
+    Serial.print(";");
+    Serial.println(fdb3e);
+
+    // print
+
+    // rectangle
+    tft.drawRect(0, 148, 320, 92, ILI9340_WHITE);
+
+    // set font & color
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9340_YELLOW);
+
+    // -3dB label ------------------
+    tft.setCursor(6, 152);
+    tft.print("-3dB BW: ");
+
+    // -3db val
+    tft.setCursor(130, 152);
+    prepFreq4Print(bw3db, true);
+    tft.print(f);
+
+    // -3db freqs
+    tft.setTextColor(ILI9340_WHITE);
+    tft.setCursor(4, 172);
+    prepFreq4Print(fdb3s, true);
+    tft.print(f);
+    tft.setCursor(160, 172);
+    prepFreq4Print(fdb3e, true);
+    tft.print(f);
+
+    // -6dB label ------------------
+    tft.setTextColor(ILI9340_YELLOW);
+    tft.setCursor(6, 192);
+    tft.print("-6dB BW: ");
+
+    // -6db val
+    tft.setCursor(130, 192);
+    prepFreq4Print(bw6db, true);
+    tft.print(f);
+
+    // -6db freqs
+    tft.setTextColor(ILI9340_WHITE);
+    tft.setCursor(4, 212);
+    prepFreq4Print(fdb6s, true);
+    tft.print(f);
+    tft.setCursor(160, 212);
+    prepFreq4Print(fdb6e, true);
+    tft.print(f);
 }

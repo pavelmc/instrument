@@ -43,15 +43,17 @@ void subSettings() {
         // draw border
         tft.drawRect(20, 160, 280, 60, ILI9340_WHITE);
 
+        // all cases print the label
+        //print the label
+        tft.setTextSize(2);
+        tft.setTextColor(ILI9340_YELLOW);
+        tft.setCursor(30, 164);
+        tft.print(configLabels[config]);
+
         // select the case
         switch (config) {
             case 0:
                 // ppm
-                //print the label
-                tft.setTextSize(2);
-                tft.setTextColor(ILI9340_YELLOW);
-                tft.setCursor(30, 164);
-                tft.print(configLabels[config]);
                 // set note
                 prepFreq4Print(*mainFreq, false);
                 tft.setTextColor(ILI9340_WHITE);
@@ -63,7 +65,8 @@ void subSettings() {
                 break;
 
             case 1:
-                //
+                // vfo offset
+                showOffset();
                 break;
         }
     } else {
@@ -94,6 +97,19 @@ void showPPM() {
     tft.print(f);
 }
 
+void showOffset() {
+    // reset the print buffers
+    prepFreq4Print(vfoOffset, true);
+
+    // place it on the place
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9340_WHITE, ILI9340_BLACK);
+    tft.setCursor(30, 190);
+
+    // print it
+    tft.print(f);
+}
+
 
 // move config
 void moveConfig(char dir) {
@@ -103,7 +119,7 @@ void moveConfig(char dir) {
     if (confSelected) {
         // config selected, modifiying
         switch (config) {
-            case 0: // ppm
+            case 0:
                 // mod the ppm
                 ppm += 10L * dir;
 
@@ -115,8 +131,19 @@ void moveConfig(char dir) {
                 showPPM();
                 break;
 
-            case 1: // ?
-                //
+            case 1:
+                // mod the vfo0ffset
+                vfoOffset += getStep() * dir;
+
+                // serial debug
+                Serial.println(vfoOffset);
+
+                // apply the change
+                //~ Si.correction(ppm);
+                setFreq(*mainFreq);
+
+                // show it
+                showOffset();
                 break;
         }
     } else {

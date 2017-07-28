@@ -88,12 +88,12 @@ BMux abm;
 
 
 /****** VERSION INFORMATION ***********************/
-#define VERSION 5
+#define VERSION 6
 
 // vars
 
 // this is the IF at 27 Mhz with a homebrew filter
-#define VFO_OFFSET      26994359        // corrected value
+#define VFO_OFFSET      26994200        // default value
 
 /****** Frequency control related ******************************************/
 long vfoA = 100000000L;     // VFO A
@@ -103,6 +103,7 @@ long *subFreq;              // the one in reserve
 word pep[10];
 char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
+long  vfoOffset = VFO_OFFSET;
 
 // define the mixing xtal and jumping
 // limits
@@ -157,11 +158,15 @@ word minv, maxv;
 
 // the delay pause, in milli seconds after each pause
 #define SCAN_PAUSE  3
-#define DATA_LEN    12 // bytes
 
 // vard related to -3 & -6 db points
 // levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
 word dB05l, dB1l, dB3l, dB6l, dB9l;
+
+// variable for the db
+long fdb3s, fdb3e, fdb6s, fdb6e;
+long bw3db, bw6db;
+
 
 /****************** FLASH related vars ***********************************/
 
@@ -170,6 +175,9 @@ byte flashDataPerPage;  // how many data object we have per page of 256 bytes
 byte flashPagesInAScan; // cuantas páginas se lleva un scan.
 word flashMaxScans;     // the amount of scans we dispose of
 word flashPosition;     // the object space in the flash at we are now
+
+// length of the data to write
+#define DATA_LEN    6 // bytes
 
 
 /****** MODE related vars and defines ***************************************/
@@ -209,7 +217,7 @@ char *stepLabels[] = {
 byte config = 0;
 char *configLabels[] = {
     "Si5351 PPM",
-    "Return to Menu"
+    "VFO Offset {IF}"
 };
 boolean confSelected = false;
 #define CONF_COUNT      2
@@ -251,70 +259,37 @@ unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
 // the encoder need to move
 void encoderMoved(char dir) {
     // do what you need to do in any case (Mode)
-    switch (mode) {
-        case MODE_MENU:
-            // move in the menu selection
-            moveMenu(dir);
-            break;
 
-        case MODE_SIGEN:
-            // move the VFO but in which dir
-            moveVFO(dir, true);
-            break;
-
-        case MODE_SWEEP:
-            // move the scan span (sspan)
-            moveSpanUpdate(dir);
-            break;
-
-        case MODE_METER:
-            // select between measures for the main bar
-            moveVFO(dir, false);
-            // print main as sub
-            subFreqPrint(false);
-            break;
-
-        case MODE_CONFIG:
-            // showing or modifiying
-            moveConfig(dir);
-            break;
+    // MENU
+    if (mode == MODE_MENU) {
+        // move in the menu selection
+        moveMenu(dir);
     }
-}
 
+    // SIGEN
+    if (mode == MODE_SIGEN) {
+        // move the VFO but in which dir
+        moveVFO(dir, true);
+    }
 
-// check button
-void checkButton() {
-    // To check values when analog button are pressed
-    abm.check();
+    // SWEEP
+    if (mode == MODE_SWEEP) {
+        // move the scan span (sspan)
+        moveSpanUpdate(dir);
+    }
 
-    // step button check
-    if (dbBtnPush.update() == 1) {
-        // button changed
+    // METER
+    if (mode == MODE_METER) {
+        // select between measures for the main bar
+        moveVFO(dir, false);
+        // print main as sub
+        subFreqPrint(false);
+    }
 
-        // btn down
-        if (dbBtnPush.fell()) {
-            // start counting
-            btnDownTime = millis();
-        }
-
-        // bton up
-        if (dbBtnPush.rose()) {
-            long t = millis() - btnDownTime;
-
-            // check if hold
-            if (t > 1000 and t < 3000) {
-                // call action for buttons HOLD
-                checkHoldButton();
-            }
-
-            // check on click
-            if (t < 500 and t > 100) {
-                checkPushButton();
-            }
-
-            // reset timer
-            btnDownTime = millis();
-        }
+    // CONFIG
+    if (mode == MODE_CONFIG) {
+        // showing or modifiying
+        moveConfig(dir);
     }
 }
 

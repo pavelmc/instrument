@@ -69,19 +69,35 @@ void cleanPrintbuffer() {
 
 // prepare the freq for printing
 void prepFreq4Print(long fr, boolean doHz) {
-    // temp vars
-    byte l = 0;
-
     // clear the buffers
     cleanPrintbuffer();
 
     // load the freq to the temp buffer
     ltoa(fr, t, DEC);
+    byte l = strlen(t);     // 26630
 
-    // check the size to know where to cut it down
-    l = strlen(t);
-
+    // check size
     switch (l) {
+        case 2: // "90"
+            strncat(f, &empty[0], 5);   // "     "
+            strncat(f, &empty[0], 4);   //       "    "
+            strcat(f, t);               //            "90"
+            break;
+
+        case 3: // "900"
+            strncat(f, &empty[0], 5);   // "     "
+            strncat(f, &empty[0], 3);   //       "   "
+            strcat(f, t);               //           "900"
+            break;
+
+        case 4: // "9.000"
+            strncat(f, &empty[0], 5);   // "     "
+            strncat(f, &empty[0], 1);   //       " "
+            strncat(f, &t[0], 1);       //        "9"
+            strcat(f, ".");             //          "."
+            strncat(f, &t[1], 3);       //            "000"
+            break;
+
         case 5: // "90.000"
             strncat(f, &empty[0], 5);   // "     "
             strncat(f, &t[0], 2);       //       "90"
@@ -228,8 +244,8 @@ void setFreq(unsigned long f) {
     // set VFO freq to obtain a VFO_OFFSET, but
     // - below 100 Mhz we put the VFO above
     // - above 100 Mhz we put it below
-    if (f < 100000000)  Si.setFreq(0, f + VFO_OFFSET);
-    else                Si.setFreq(0, f - VFO_OFFSET);
+    if (f < 100000000)  Si.setFreq(0, f + vfoOffset);
+    else                Si.setFreq(0, f - vfoOffset);
 
     // reset both PLLs
     Si.reset();
