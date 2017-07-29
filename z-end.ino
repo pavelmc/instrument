@@ -2,7 +2,7 @@
 // setup
 void setup() {
     // serial int
-    Serial.begin(230400);   // 1/4 Mbps
+    Serial.begin(57600);   // 1/4 Mbps
 
     // frequency pointer settings
     mainFreq = &vfoA;     // main freq, the one it's used now
@@ -41,7 +41,7 @@ void setup() {
 
     // set power
     Si.setPower(0, 0);
-    Si.setPower(2, 3);
+    Si.setPower(2, 0);
 
     // enable outputs
     Si.enable(0);
@@ -80,4 +80,7 @@ void loop(void) {
 
     // in power meter mode we need to update the screen info
     if (mode == MODE_METER) powerMeasureAndShow();
+
+    // serial coms
+    if (mode == MODE_PC) serialComms();
 }

@@ -135,11 +135,12 @@ void moveConfig(char dir) {
                 // mod the vfo0ffset
                 vfoOffset += getStep() * dir;
 
-                // serial debug
-                Serial.println(vfoOffset);
+                #ifdef DEBUG
+                    // serial debug
+                    Serial.println(vfoOffset);
+                #endif
 
                 // apply the change
-                //~ Si.correction(ppm);
                 setFreq(*mainFreq);
 
                 // show it

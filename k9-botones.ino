@@ -76,7 +76,7 @@ void checkPushButton() {
 
     // METER
     if (mode == MODE_METER) {
-        // do what?
+        // do change step
         changeStep(1);
     }
 
@@ -95,30 +95,30 @@ void checkPushButton() {
 void checkHoldButton() {
     // do what you need to do in any case
 
-    // MENU
-    if (mode == MODE_MENU) {
-        // NOOP
-    }
+    //~ // MENU
+    //~ if (mode == MODE_MENU) {
+        //~ // NOOP
+    //~ }
 
-    // SIGEN
-    if (mode == MODE_SIGEN) {
-        // NOOP
-    }
+    //~ // SIGEN
+    //~ if (mode == MODE_SIGEN) {
+        //~ // NOOP
+    //~ }
 
-    // SWEEP
-    if (mode == MODE_SWEEP) {
-        // NOOP
-    }
+    //~ // SWEEP
+    //~ if (mode == MODE_SWEEP) {
+        //~ // NOOP
+    //~ }
 
-    // METER
-    if (mode == MODE_METER) {
-        // NOOP
-    }
+    //~ // METER
+    //~ if (mode == MODE_METER) {
+        //~ // NOOP
+    //~ }
 
-    // CONFIG
-    if (mode == MODE_CONFIG) {
-        // NOOP
-    }
+    //~ // CONFIG
+    //~ if (mode == MODE_CONFIG) {
+        //~ // NOOP
+    //~ }
 }
 
 
@@ -137,15 +137,15 @@ void bMenuClick() {
 void bMagicClick() {
     // Go to most common options in each mode
 
-    // MENU
-    if (mode == MODE_MENU) {
-        // NOOP
-    }
+    //~ // MENU
+    //~ if (mode == MODE_MENU) {
+        //~ // NOOP
+    //~ }
 
-    // SIGEN
-    if (mode == MODE_SIGEN) {
-        // NOOP
-    }
+    //~ // SIGEN
+    //~ if (mode == MODE_SIGEN) {
+        //~ // NOOP
+    //~ }
 
     // SWEEP
     if (mode == MODE_SWEEP) {
@@ -155,15 +155,15 @@ void bMagicClick() {
         changeMode();
     }
 
-    // METER
-    if (mode == MODE_METER) {
-        // NOOP
-    }
+    //~ // METER
+    //~ if (mode == MODE_METER) {
+        //~ // NOOP
+    //~ }
 
-    // CONFIG
-    if (mode == MODE_CONFIG) {
-        // NOOP
-    }
+    //~ // CONFIG
+    //~ if (mode == MODE_CONFIG) {
+        //~ // NOOP
+    //~ }
 }
 
 
@@ -171,15 +171,15 @@ void bMagicClick() {
 void bMagicHold() {
     // Go to most common options in each mode
 
-    // MENU
-    if (mode == MODE_MENU) {
-        // NOOP
-    }
+    //~ // MENU
+    //~ if (mode == MODE_MENU) {
+        //~ // NOOP
+    //~ }
 
-    // SIGEN
-    if (mode == MODE_SIGEN) {
-        // NOOP
-    }
+    //~ // SIGEN
+    //~ if (mode == MODE_SIGEN) {
+        //~ // NOOP
+    //~ }
 
     // SWEEP
     if (mode == MODE_SWEEP) {
@@ -187,15 +187,15 @@ void bMagicHold() {
         showDB();
     }
 
-    // METER
-    if (mode == MODE_METER) {
-        // NOOP
-    }
+    //~ // METER
+    //~ if (mode == MODE_METER) {
+        //~ // NOOP
+    //~ }
 
-    // CONFIG
-    if (mode == MODE_CONFIG) {
-        // NOOP
-    }
+    //~ // CONFIG
+    //~ if (mode == MODE_CONFIG) {
+        //~ // NOOP
+    //~ }
 }
 
 
@@ -203,10 +203,10 @@ void bMagicHold() {
 void bLeftClick() {
     // Go left or select next left option
 
-    // MENU
-    if (mode == MODE_MENU) {
-        // NOOP
-    }
+    //~ // MENU
+    //~ if (mode == MODE_MENU) {
+        //~ // NOOP
+    //~ }
 
     // SIGEN
     if (mode == MODE_SIGEN) {
@@ -218,13 +218,14 @@ void bLeftClick() {
     if (mode == MODE_SWEEP) {
         // Set min level freq as center of the scan and
         // re do the scan
-        makeScan2Min();
+        *mainFreq = minf;
+        makeScan();
     }
 
-    // METER
-    if (mode == MODE_METER) {
-        // NOOP
-    }
+    //~ // METER
+    //~ if (mode == MODE_METER) {
+        //~ // NOOP
+    //~ }
 
     // CONFIG
     if (mode == MODE_CONFIG) {
@@ -238,10 +239,10 @@ void bLeftClick() {
 void bRightClick() {
     // Go right or select next right option
 
-    // MENU
-    if (mode == MODE_MENU) {
-        // NOOP
-    }
+    //~ // MENU
+    //~ if (mode == MODE_MENU) {
+        //~ // NOOP
+    //~ }
 
     // SIGEN
     if (mode == MODE_SIGEN) {
@@ -252,13 +253,14 @@ void bRightClick() {
     // SWEEP
     if (mode == MODE_SWEEP) {
         // sef vfo to max and make a scan there
-        makeScan2Max();
+        *mainFreq = maxf;
+        makeScan();
     }
 
-    // METER
-    if (mode == MODE_METER) {
-        // NOOP
-    }
+    //~ // METER
+    //~ if (mode == MODE_METER) {
+        //~ // NOOP
+    //~ }
 
     // CONFIG
     if (mode == MODE_CONFIG) {

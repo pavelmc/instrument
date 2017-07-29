@@ -62,6 +62,11 @@ void changeMode() {
             showMeterMode();
             break;
 
+        case MODE_PC:
+            // draw the PC interface
+            showPCMode();
+            break;
+
         case MODE_CONFIG:
             // draw the Configurations menu
             settings();

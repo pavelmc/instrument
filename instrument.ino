@@ -5,6 +5,11 @@
  * Email: pavelmc@gmail.com
  ****************************************************/
 
+/********** DEBUG MODE *************************/
+// uncomment this to get a few hits via serial
+//#define DEBUG true
+
+
 #include "SPI.h"
 #include <EEPROM.h>
 #include "Adafruit_GFX.h"
@@ -127,7 +132,7 @@ unsigned long sweep_spans[] = {
     10000000,       // 10MHz
     30000000,       // 30MHz
     100000000,      // 100MHz
-    200000000       // 200MHz
+    300000000       // 300MHz
 
 };
 char *sweep_spans_labels[] = {
@@ -143,7 +148,7 @@ char *sweep_spans_labels[] = {
     "10.0MHz",
     "30.0MHz",
     " 100MHz",
-    " 200MHz"
+    " 300MHz"
 };
 
 #define SPAN_COUNT  12
@@ -187,14 +192,16 @@ byte smode = mode;      // selected mode in the menu selection
 #define MODE_SIGEN      1
 #define MODE_SWEEP      2
 #define MODE_METER      3
-#define MODE_CONFIG     4
-#define MODE_COUNT      5
+#define MODE_PC         4
+#define MODE_CONFIG     5
+#define MODE_COUNT      6
 
 char *modeLabels[] = {
     "MODE SELECTOR",
     "SIGNAL GENERATOR",
     "SWEEP ANALYZER",
     "POWER METER",
+    "COMPUTER MODE",
     "SETTINGS"
 };
 

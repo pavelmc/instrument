@@ -207,8 +207,10 @@ void makeScan() {
     //  clean screen and draw graphic
     drawbars(tftmin, tftmax);
 
-    // print serial headers
-    Serial.println("freq;load");
+    #ifdef DEBUG
+        // print serial headers
+        Serial.println("freq;load");
+    #endif
 
     // draw and spit via serial
     for (word i = 0; i < 320; i++) {
@@ -227,10 +229,12 @@ void makeScan() {
         // prepare for next cycle
         lx = measure;
 
-        // "freq;load"
-        Serial.print(hs);
-        Serial.print(";");
-        Serial.println(vl);
+        #ifdef DEBUG
+            // "freq;load"
+            Serial.print(hs);
+            Serial.print(";");
+            Serial.println(vl);
+        #endif
     }
 
     // print min max
@@ -320,11 +324,14 @@ void drawbars(word tftmin, word tftmax) {
     prepFreq4Print(scan_high, true);
     tft.print(f);
 
-    // print span on top
-    tft.setCursor(120, 5);
-    tft.setTextSize(2);
+    // print span on top + center freq
+    tft.setCursor(140, 3);
+    tft.setTextSize(1);
     tft.setTextColor(ILI9340_GREEN);
     tft.print(sweep_spans_labels[sspan]);
+    prepFreq4Print((scan_high-scan_low) / 2 + scan_low, true);
+    tft.setCursor(128, 13);
+    tft.print(f);
 }
 
 
@@ -335,20 +342,6 @@ void printdBlines(int val, char *text) {
         tft.setCursor(282, 232 - val);
         tft.print(text);
     }
-}
-
-
-//
-void makeScan2Min() {
-    *mainFreq = minf;
-    makeScan();
-}
-
-
-//
-void makeScan2Max() {
-    *mainFreq = maxf;
-    makeScan();
 }
 
 
@@ -389,13 +382,14 @@ void showDB() {
     bw3db = fdb3e - fdb3s;
     bw6db = fdb6e - fdb6s;
 
-    /*** DEBUG ***/
-    Serial.println("3dB");
-    Serial.print(bw3db);
-    Serial.print(";");
-    Serial.print(fdb3s);
-    Serial.print(";");
-    Serial.println(fdb3e);
+    #ifdef DEBUG
+        Serial.println("3dB");
+        Serial.print(bw3db);
+        Serial.print(";");
+        Serial.print(fdb3s);
+        Serial.print(";");
+        Serial.println(fdb3e);
+    #endif
 
     // print
 
