@@ -49,7 +49,6 @@ Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
  *      - Coordinate system is always (y, x, +y, +x)
  *      - Text cursor is always referenced to the top left corner
  *
- *
  * ****************************************************************************/
 
 // Enable weak pullups in the rotary lib before inclusion
@@ -192,15 +191,17 @@ byte smode = mode;      // selected mode in the menu selection
 #define MODE_SIGEN      1
 #define MODE_SWEEP      2
 #define MODE_METER      3
-#define MODE_PC         4
-#define MODE_CONFIG     5
-#define MODE_COUNT      6
+#define MODE_SA         4
+#define MODE_PC         5
+#define MODE_CONFIG     6
+#define MODE_COUNT      7
 
 char *modeLabels[] = {
     "MODE SELECTOR",
     "SIGNAL GENERATOR",
     "SWEEP ANALYZER",
     "POWER METER",
+    "SPECTRUM ANALYZER",
     "COMPUTER MODE",
     "SETTINGS"
 };
@@ -280,7 +281,7 @@ void encoderMoved(char dir) {
     }
 
     // SWEEP
-    if (mode == MODE_SWEEP) {
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
         // move the scan span (sspan)
         moveSpanUpdate(dir);
     }
@@ -300,4 +301,4 @@ void encoderMoved(char dir) {
     }
 }
 
-/*** Other function in files and z-end ***/
+/*** Other function in k#-files and z-end ***/

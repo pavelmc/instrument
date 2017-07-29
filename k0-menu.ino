@@ -1,3 +1,10 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
+
 
 // menu functions
 void menu() {
@@ -40,37 +47,36 @@ void changeMode() {
     // redraw the top box
     drawtopbox();
 
-    switch (mode) {
-        case MODE_MENU:
-            // draw the main menu
-            menu();
-            break;
-
-        case MODE_SIGEN:
-            // draw the signal generator interface
-            vfobox();
-            scale(88);
-            break;
-
-        case MODE_SWEEP:
-            // draw the sweeper interface
-            sweep_box();
-            break;
-
-        case MODE_METER:
-            // draw the meter interface
-            showMeterMode();
-            break;
-
-        case MODE_PC:
-            // draw the PC interface
-            showPCMode();
-            break;
-
-        case MODE_CONFIG:
-            // draw the Configurations menu
-            settings();
-            break;
+    // MENU
+    if (mode == MODE_MENU) {
+        // draw the main menu
+        menu();
+    }
+    // SIGNAL GENERATOR
+    if (mode == MODE_SIGEN) {
+        // draw the signal generator interface
+        vfobox();
+        //~ scale(88);
+    }
+    // SWEEP & SA
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
+        // draw the sweeper interface
+        sweep_box();
+    }
+    // METER
+    if (mode == MODE_METER) {
+        // draw the meter interface
+        showMeterMode();
+    }
+    // PC
+    if (mode == MODE_PC) {
+        // draw the PC interface
+        showPCMode();
+    }
+    // CONFIGURE
+    if (mode == MODE_CONFIG) {
+        // draw the Configurations menu
+        settings();
     }
 
     // save settings

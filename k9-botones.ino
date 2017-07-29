@@ -1,3 +1,9 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
 
 
 // check button
@@ -41,8 +47,14 @@ void checkButton() {
 /******************************************************************************
  *   MENU       MAGIC         <(LEFT)         >(RIGHT)
  *
- * MENU es para dejar lo que estas haciendo y volver al menu principal
- * MAGIC opciones muy usuales según el modo
+ * MENU
+ *  Click
+ *      MENU = go to selected mode
+ *      OTHER = go to menu mode
+ *  Hold = Cambia vfoA <> vfoB
+ * MAGIC
+ *  Click = opciones muy usuales según el modo
+ *  Hold = SWEEP = DB limits
  * < minimo o izquierda
  * > maximo o derecha
  *
@@ -69,7 +81,7 @@ void checkPushButton() {
     }
 
     // SWEEP
-    if (mode == MODE_SWEEP) {
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
         // start the scan
         makeScan();
     }
@@ -124,8 +136,34 @@ void checkHoldButton() {
 
 // MENU button click
 void bMenuClick() {
-    // no importa donde, simplemente retornar al menu
-    mode = MODE_MENU;
+    // si estamos en un modo retorna a modo menu, s no es como el OK
+    if (mode != MODE_MENU) {
+        // no importa donde, simplemente retornar al menu
+        mode = MODE_MENU;
+        changeMode();
+    } else {
+        // estamos en modo menu
+        // aplicamos la opción seleccionada
+        mode = smode;
+        changeMode();
+    }
+
+    // save settings on exit
+    saveEEPROM();
+}
+
+
+// MENU button hold
+void bMenuHold() {
+    // no importa donde, cambiar los VFOs
+    long temp = vfoB;
+    vfoB = vfoA;
+    vfoA = temp;
+
+    // set freq
+    setFreq(*mainFreq);
+
+    // actualizar la interface
     changeMode();
 
     // save settings on exit
@@ -142,13 +180,15 @@ void bMagicClick() {
         //~ // NOOP
     //~ }
 
-    //~ // SIGEN
-    //~ if (mode == MODE_SIGEN) {
-        //~ // NOOP
-    //~ }
+    // SIGEN
+    if (mode == MODE_SIGEN) {
+        // the most useful option is return to sweep mode
+        mode = MODE_SWEEP;
+        changeMode();
+    }
 
     // SWEEP
-    if (mode == MODE_SWEEP) {
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
         // most useful option is go to signal generator
         // to retune the center freq
         mode = MODE_SIGEN;
@@ -214,8 +254,8 @@ void bLeftClick() {
         changeStep(-1);
     }
 
-    // SWEEP
-    if (mode == MODE_SWEEP) {
+    // SWEEP & SA
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
         // Set min level freq as center of the scan and
         // re do the scan
         *mainFreq = minf;
@@ -250,8 +290,8 @@ void bRightClick() {
         changeStep(1);
     }
 
-    // SWEEP
-    if (mode == MODE_SWEEP) {
+    // SWEEP & SA
+    if (mode == MODE_SWEEP || mode == MODE_SA) {
         // sef vfo to max and make a scan there
         *mainFreq = maxf;
         makeScan();
@@ -275,7 +315,7 @@ void bRightClick() {
  *****************************************************************************/
 
 // menu
-Button bMENU = Button(695, &bMenuClick);
+Button bMENU = Button(695, &bMenuClick, &bMenuHold);
 
 // magic
 Button bMAGIC = Button(509, &bMagicClick, &bMagicHold);

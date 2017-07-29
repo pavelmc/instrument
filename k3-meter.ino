@@ -1,3 +1,10 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
+
 
 // make a read every 100 mse cand average it
 void powerMeasureAndShow() {

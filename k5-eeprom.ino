@@ -1,3 +1,10 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
+
 
 // structured data: Main Configuration Parameters
 struct mConf {

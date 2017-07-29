@@ -1,3 +1,10 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
+
 
 // take ADC samples and put the adc values on the environment
 void takeADCSamples() {

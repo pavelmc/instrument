@@ -21,9 +21,9 @@ from tkSimpleDialog import askstring
 from tkMessageBox import *
 
 # change this to the appropriate serial port for your setup
-SERIALPORT = "/dev/ttyUSB0"
+SERIALPORT = "/dev/ttyUSB1"
 SERIALPORT_SPEED = 57600
-SERIALPORT_TIMEOUT = 0.05
+SERIALPORT_TIMEOUT = 0.06
 
 # Values that can be modified
 GRWN = 1024                  # Width of the grid
@@ -40,8 +40,8 @@ Sweepreset = False       # flag to restart the sample sweep
 
 UPDATEspeed = 1.1           # Update speed can be increased when problems if PC too slow, default 1.1
 
-DBdivlist = [0.1, 0.5, 1, 2, 3, 5, 10, 20] # dB per division
-DBdivindex = 6              # 10 dB/div as initial value
+DBdivlist = [0.05, 0.1, 0.5, 1, 2, 3, 5, 10, 20] # dB per division
+DBdivindex = 7              # 10 dB/div as initial value
 
 DBlevel = 10                 # Reference level
 
@@ -91,7 +91,7 @@ T2line = []                 # Trace line channel 2
 S1line = []                 # Line for start of signal band indication
 S2line = []                 # line for stop of signal band indication
 
-RUNstatus = 1               # 0 stopped, 1 start, 2 running, 3 stop now, 4 stop and restart
+RUNstatus = 0               # 0 stopped, 1 start, 2 running, 3 stop now, 4 stop and restart
 STOREtrace = False          # Store and display trace
 Referenceon  = 0            # apply calbration reference
 REFstore  = 0               # save calbration readings
@@ -106,7 +106,10 @@ def Zerosamples(): # reset the sample array - minimizes confusion when setting a
     global DBmreadings
     DBmreadings = [0 for x in range(MAXSAMPLES)]
 
+
 # =================================== Start widgets routines ========================================
+
+
 def on_click(self, event):
         # Last click in absolute coordinates
         self.prev_var.set('%s:%s' % self.last_point)
@@ -114,8 +117,10 @@ def on_click(self, event):
         self.curr_var.set('%s:%s' % (event.x - self.last_point[0], event.y - self.last_point[1]))
         self.last_point = event.x, event.y
 
+
 def Bnot():
     print "Routine not made yet"
+
 
 # handle markers when mouse is clicked in middle frame
 def Bmarker1(event):
@@ -125,13 +130,14 @@ def Bmarker1(event):
     Marker1x=event.x
     Marker1y=event.y
 
+
 def Bmarker2(event):
     global Marker2x
     global Marker2y
 
     Marker2x=event.x
     Marker2y=event.y
-    #print "button 2 clicked at", event.x, event.y
+    print "button 2 clicked at", event.x, event.y
 
 
 def BAveragemode():
@@ -200,6 +206,7 @@ def BSTOREtrace():
     else:
         STOREtrace = False
     UpdateTrace()           # Always Update
+
 
 def BAutoY():  # auto adjust offset and range
     global Vdiv
@@ -314,7 +321,6 @@ def BStop():
     UpdateScreen()          # Always Update
 
 
-
 def BStartfrequency():
     global STARTfrequency
     global STOPfrequency
@@ -388,7 +394,6 @@ def BStopfrequency():
         UpdateTrace()
 
 
-
 # samples per sweep can also be set via the setup dialog for custom values
 def Bsamples1():
     global SAMPLES
@@ -454,9 +459,8 @@ def BDBdiv2():
         UpdateTrace()
 
 
-
-
 # ============================================ Main routine ====================================================
+
 
 def Sweep():   # Read samples
     global SERIALPORT
@@ -477,6 +481,7 @@ def Sweep():   # Read samples
     global TRACEaverage
     global Sweepreset
 
+    UpdateAll()
 
     while (True):                                           # Main loop
         # RUNstatus = 1 : Open Stream
@@ -492,9 +497,10 @@ def Sweep():   # Read samples
                 RUNstatus = 0
                 showerror("Cannot open Serial device")
 
-            time.sleep(2)
-
             UpdateScreen()                                  # UpdateScreen() call
+
+            # delay to allow the Arduino reset and mode change
+            time.sleep(4)
 
         # RUNstatus = 2: Reading data from power monitor
         if (RUNstatus == 2):
@@ -503,8 +509,8 @@ def Sweep():   # Read samples
             if (TRACEmode == 3):      # average mode
                 adsamplecount=TRACEaverage
 
-#create the list of frequencies - X axis
-            incr=(STOPfrequency-STARTfrequency)/SAMPLES
+            #create the list of frequencies - X axis
+            incr=(STOPfrequency - STARTfrequency)/SAMPLES
             t = numpy.arange(STARTfrequency, STOPfrequency, incr)
 
             #if REFstore == 1:  # save ref levels
@@ -534,10 +540,10 @@ def Sweep():   # Read samples
                     # l can't be zero
                     if l == 0:
                         # a default low value
-                        l = 0.5
+                        l = 0.9
 
+                    # this a re mv Values in mV*10, convert it to dB on the fly
                     ld = l/50000.0
-
                     dbm = dbm + math.log(ld)
 
                     i=i+1
@@ -552,10 +558,8 @@ def Sweep():   # Read samples
                 frequency=frequency+incr
                 step=step+1
 
-            cmd = str(long(STARTfrequency)) # prime the dds with the initial measurement for the next cycle
-            cmd = cmd + "\n"
+            cmd = str(long(STARTfrequency)) + "\n" # prime the dds with the initial measurement for the next cycle
             ser.write(cmd) # set DDS back to start frequency
-            sleep(0.1)  # time delay to let the power meter settle
             UpdateAll()                                     # Update Data, trace and screen
             Sweepreset=False  # reset the sweep "start over" flag
             if ((REFstore == True) & (step == SAMPLES)): # make sure we have 1 full sweep to cal
@@ -590,7 +594,6 @@ def UpdateTrace():      # Update trace and screen
 def UpdateScreen():     # Update screen with trace and text
     MakeScreen()        # Update the screen
     root.update()       # Activate updated screens
-
 
 
 def MakeTrace():        # Update the grid and trace
@@ -817,13 +820,19 @@ def MakeScreen():       # Update the screen with traces and text
     y = Y0T+GRH+40
     idTXT = ca.create_text (x, y, text=txt, anchor=W, fill=COLORtext)
 
-# show the values at the mouse cursor
-# note the magic numbers below were determined by looking at the cursor values
-# not sure why they don't correspond to X0T and Y0T
-    cursorx = (STARTfrequency + (root.winfo_pointerx()-root.winfo_rootx()-X0L-4) * (STOPfrequency-STARTfrequency)/GRW) /1000000
-    cursory = DBlevel - (root.winfo_pointery()-root.winfo_rooty()-Y0T-50) * Vdiv*DBdivlist[DBdivindex] /GRH
+    # show the values at the mouse cursor
+    # note the magic numbers below were determined by looking at the cursor values
+    # not sure why they don't correspond to X0T and Y0T
 
-    txt = "Cursor " + str(cursorx)  + " MHz   " + str(cursory) + " dB"
+    cursorx = (STARTfrequency + \
+        (root.winfo_pointerx() - root.winfo_rootx() - X0L - 4) * \
+        (STOPfrequency - STARTfrequency) / GRW) / 1000000
+
+    cursory = DBlevel - \
+        (root.winfo_pointery() - root.winfo_rooty() - Y0T - 50) * \
+        Vdiv * DBdivlist[DBdivindex] / GRH
+
+    txt = "Cursor %.6f MHz  Level %.2f dB" % (cursorx, cursory)
 
     x = X0L + 40
     y = Y0T -10
@@ -835,7 +844,7 @@ def MakeScreen():       # Update the screen with traces and text
         idTXT = ca.create_text (Marker1x-3, Marker1y+4, text="^", anchor=W, fill=COLORMarker1)
         Marker1freq = (STARTfrequency + (Marker1x-19) * (STOPfrequency-STARTfrequency)/GRW) /1000000
         Marker1db = DBlevel - (Marker1y-20) * Vdiv*DBdivlist[DBdivindex] /GRH
-        txt = "Marker1 " + str(Marker1freq)  + " MHz   " + str(Marker1db) + " dB"
+        txt = "Marker1 %.6f MHz %.2f dB" % (Marker1freq, Marker1db)
         x = X0L + 300
         y = Y0T -10
         idTXT = ca.create_text (x, y, text=txt, anchor=W, fill=COLORMarker1)
@@ -846,7 +855,7 @@ def MakeScreen():       # Update the screen with traces and text
         idTXT = ca.create_text (Marker2x-3, Marker2y+4, text="^", anchor=W, fill=COLORMarker2)
         Marker2freq = (STARTfrequency + (Marker2x-19) * (STOPfrequency-STARTfrequency)/GRW) /1000000
         Marker2db = DBlevel - (Marker2y-20) * Vdiv*DBdivlist[DBdivindex] /GRH
-        txt = "Marker2 " + str(Marker2freq)  + " MHz   " + str(Marker2db) + " dB"
+        txt = "Marker2 %.6f MHz %.2f dB" % (Marker2freq, Marker2db)
         x = X0L + 520
         y = Y0T -10
         idTXT = ca.create_text (x, y, text=txt, anchor=W, fill=COLORMarker2)
@@ -855,14 +864,14 @@ def MakeScreen():       # Update the screen with traces and text
     if (Marker1valid & Marker2valid):
         Deltafreq = abs(Marker2freq-Marker1freq)
         Deltadb = abs(Marker2db-Marker1db)
-        txt = "Delta " + str(Deltafreq)  + " MHz   " + str(Deltadb) + " dB"
+        txt = "Delta %.6f MHz %.2f dB" % (Deltafreq, Deltadb)
         x = X0L + 750
         y = Y0T -10
         idTXT = ca.create_text (x, y, text=txt, anchor=W, fill=COLORtext)
 # ================ Make Screen ==========================
 
 root=Tk()
-root.title("VE3MKC Simple Scalar Network Analyzer")
+root.title("CO7WT Simple Scalar Network Analyzer")
 
 root.minsize(100, 100)
 

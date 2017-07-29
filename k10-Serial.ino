@@ -1,7 +1,12 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
 
 
 // SERIAL comms with the PC.
-
 /******************************************************************************
  * This is the main interaction with the PC.
  * -> Send a freq + "\n" and we set the VFO to that (ex: "7110000\n")
@@ -10,6 +15,10 @@
  * All answers are terminated with an "\n"
  *
  * As simple as that.
+ *
+ * BEWARE!
+ * You must wait at least 5 msec between the freq command and the data reading
+ *
  ******************************************************************************/
 void serialComms() {
     // local vars
@@ -69,5 +78,18 @@ void sendVal() {
 
 // show pc mode
 void showPCMode() {
-    mainFreqPrint();
+    // ADVICE PC control
+    tft.setCursor(30, 40);
+    tft.setTextColor(ILI9340_YELLOW);
+    tft.setTextSize(4);
+    tft.print("PC CONTROL!");
+
+    // unplug mesg
+    tft.setTextColor(ILI9340_CYAN);
+    tft.setTextSize(2);
+    tft.setCursor(10, 80);
+    tft.print("Unplug the USB and");
+    tft.setCursor(10, 100);
+    tft.print("click MENU to leave");
+
 }

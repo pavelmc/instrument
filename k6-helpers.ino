@@ -1,3 +1,9 @@
+/***************************************************
+ * Multi-instrumento
+ *
+ * Author: M.Sc. Pavel Milanes Costa
+ * Email: pavelmc@gmail.com
+ ****************************************************/
 
 
 // function to get out of the specif option and back to menu
@@ -238,14 +244,21 @@ byte moveWithLimits(byte var, char dir, byte low, byte high) {
  *  CLK0 will be the 220Mhz reference.
  ***************************************************************************/
 void setFreq(unsigned long f) {
-    // set main RF freq
-    Si.setFreq(2, f);
+    // set main RF
+    // but desctivate it if SA mode
+    if (mode == MODE_SA) {
+        // disabled
+        Si.disable(2);
+    } else {
+        // set freq
+         Si.setFreq(2, f);
+    }
 
     // set VFO freq to obtain a VFO_OFFSET, but
-    // - below 100 Mhz we put the VFO above
-    // - above 100 Mhz we put it below
-    if (f < 100000000)  Si.setFreq(0, f + vfoOffset);
-    else                Si.setFreq(0, f - vfoOffset);
+    // - below 70 Mhz we put the VFO above
+    // - above 70 Mhz we put it below
+    if (f < 70000000)  Si.setFreq(0, f + vfoOffset);
+    else               Si.setFreq(0, f - vfoOffset);
 
     // reset both PLLs
     Si.reset();
