@@ -9,12 +9,12 @@
 //flash calcs, settings for some var at setup
 void flashCalcs() {
     // how many data object per page
-    flashDataPerPage = 256 / DATA_LEN;
+    flashDataPerPage = 256 / DATA_LEN;  // 42 for a data len of 6
 
     // how many pages we use for a scan (320 data object)
-    flashPagesInAScan = 320 / flashDataPerPage;
+    flashPagesInAScan = TFT_WIDTH / flashDataPerPage;
     // check if we need a few bytes of the next page
-    if ((320 % flashDataPerPage) != 0) flashPagesInAScan += 1;
+    if ((TFT_WIDTH % flashDataPerPage) != 0) flashPagesInAScan += 1;
 
     // how many scans we have available with this chip
     flashMaxScans = (word)(flash.getMaxPage() / flashPagesInAScan);

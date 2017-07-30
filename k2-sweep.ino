@@ -9,13 +9,13 @@
 // draw the VFO box
 void sweep_box() {
     // main box
-    tft.drawRect(0, 22, 320, 44, ILI9340_WHITE);
+    tft.drawRect(0, 22, TFT_WIDTH, 44, ILI9340_WHITE);
 
     // VFO Primario
     mainFreqPrint();
 
     // lower box
-    tft.drawRect(0, 68, 320, 70, ILI9340_WHITE);
+    tft.drawRect(0, 68, TFT_WIDTH, 70, ILI9340_WHITE);
 
     // update the display
     // print span and label
@@ -99,7 +99,7 @@ void moveSpanUpdate(char dir) {
  * we must calc
  *      scan_low = scan init
  *      scan_high = scan end
- *      sstep = scan step ( = sweep_spans[sspan] / 320) in hz
+ *      sstep = scan step ( = sweep_spans[sspan] / TFT_WIDTH) in hz
  *
  * We need to define and keep account of min an max
  *      minf = freq of the minimum value
@@ -113,7 +113,7 @@ void makeScan() {
     long hs = sweep_spans[sspan] / 2;
 
     // scan step
-    sstep = sweep_spans[sspan] / 320;
+    sstep = sweep_spans[sspan] / TFT_WIDTH;
 
     // scan limts
     scan_low = *mainFreq - hs;
@@ -124,14 +124,14 @@ void makeScan() {
         // limit to low range
         scan_low = LIMI_LOW;
         // recalc step
-        sstep = (scan_high - LIMI_LOW) / 320;
+        sstep = (scan_high - LIMI_LOW) / TFT_WIDTH;
     }
 
     if (scan_high > LIMI_HIGH) {
         // limit to low range
         scan_high = LIMI_HIGH;
         // recalc step
-        sstep = (LIMI_HIGH - scan_low) / 320;
+        sstep = (LIMI_HIGH - scan_low) / TFT_WIDTH;
     }
 
     // the var that hold the masurement
@@ -166,7 +166,7 @@ void makeScan() {
         // reset tft limits to a more confortable view
         if (tftmin > 60) tftmin -= 60;
         // whatever tftmin is tftmax if 240 above it.
-        tftmax = 240 - minv;
+        tftmax = TFT_HEIGHT - minv;
     }
 
     // determine -6dB, -3dB & -1dB; 89.12
@@ -186,17 +186,17 @@ void makeScan() {
     #endif
 
     // draw and spit via serial
-    for (word i = 0; i < 320; i++) {
+    for (word i = 0; i < TFT_WIDTH; i++) {
         // read the value from FLASH
         hs = flashReadData(i);
 
         // scale the masurement against min/max plus edges
-        measure = map(vl, tftmin, tftmax, 0, 240);
+        measure = map(vl, tftmin, tftmax, 0, TFT_HEIGHT);
 
         // draw the lines
         if (i > 0) {
             // draw the line just in the second step, as the first will be down
-            tft.drawLine(i - 1 , (240 - lx), i, (240 - measure), ILI9340_CYAN);
+            tft.drawLine(i - 1 , (TFT_HEIGHT - lx), i, (TFT_HEIGHT - measure), ILI9340_CYAN);
         }
 
         // prepare for next cycle
@@ -253,8 +253,8 @@ void drawbars(word tftmin, word tftmax) {
     tft.fillScreen(ILI9340_BLACK);
 
     // vertical divisions
-    for (word y = 0; y < 320; y += (320 / bars))
-        tft.drawLine(y, 0, y, 240, ILI9340_WHITE);
+    for (word y = 0; y < TFT_WIDTH; y += (TFT_WIDTH / bars))
+        tft.drawLine(y, 0, y, TFT_HEIGHT, ILI9340_WHITE);
 
     // horizontal lines
     /************************************************************************
@@ -266,11 +266,11 @@ void drawbars(word tftmin, word tftmax) {
      * -9dB
      ************************************************************************/
     int dB05, dB1, dB3, dB6, dB9;
-    dB05 = map(dB05l, tftmin, tftmax, 0, 240);
-    dB1  = map(dB1l, tftmin, tftmax, 0, 240);
-    dB3  = map(dB3l, tftmin, tftmax, 0, 240);
-    dB6  = map(dB6l, tftmin, tftmax, 0, 240);
-    dB9  = map(dB9l, tftmin, tftmax, 0, 240);
+    dB05 = map(dB05l, tftmin, tftmax, 0, TFT_HEIGHT);
+    dB1  = map(dB1l, tftmin, tftmax, 0, TFT_HEIGHT);
+    dB3  = map(dB3l, tftmin, tftmax, 0, TFT_HEIGHT);
+    dB6  = map(dB6l, tftmin, tftmax, 0, TFT_HEIGHT);
+    dB9  = map(dB9l, tftmin, tftmax, 0, TFT_HEIGHT);
 
     // put dB labels, if possible
     tft.setTextColor(ILI9340_WHITE);
@@ -311,7 +311,7 @@ void drawbars(word tftmin, word tftmax) {
 // print db lines
 void printdBlines(int val, char *text) {
     if (val > 8 and val < 232) {
-        tft.drawLine(0, 240 - val, 320, 240 - val, ILI9340_WHITE);
+        tft.drawLine(0, TFT_HEIGHT - val, TFT_WIDTH, TFT_HEIGHT - val, ILI9340_WHITE);
         tft.setCursor(282, 232 - val);
         tft.print(text);
     }
@@ -331,7 +331,7 @@ void showDB() {
     bw3db = bw6db = 0;
 
     // update the data from the mem
-    for (word i = 0; i < 320; i++) {
+    for (word i = 0; i < TFT_WIDTH; i++) {
         // read the value from FLASH
         fc = flashReadData(i);
         // now vl has the data
@@ -349,7 +349,7 @@ void showDB() {
     }
 
     // erase bar
-    tft.fillRect(0, 140, 320, 5, ILI9340_BLACK);
+    tft.fillRect(0, 140, TFT_WIDTH, 5, ILI9340_BLACK);
 
     // calc the bandwidth of each one
     bw3db = fdb3e - fdb3s;
@@ -367,7 +367,7 @@ void showDB() {
     // print
 
     // rectangle
-    tft.drawRect(0, 148, 320, 92, ILI9340_WHITE);
+    tft.drawRect(0, 148, TFT_WIDTH, 92, ILI9340_WHITE);
 
     // set font & color
     tft.setTextSize(2);

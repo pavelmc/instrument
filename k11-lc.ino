@@ -109,13 +109,13 @@ void makeCCalcs() {
     // set scan parameters for the first round
     scan_low  =   1000000;                   //   1.0 Mhz
     scan_high = 220000000;                   // 220.0 MHz
-    sstep = (scan_high - scan_low) / 320;   // ~640 khz
+    sstep = (scan_high - scan_low) / TFT_WIDTH;   // ~640 khz
 
     // make first scan
     makeScan2Flash(136, false);
 
     // erase bar
-    tft.fillRect(0, 136, 320, 5, ILI9340_BLACK);
+    tft.fillRect(0, 136, TFT_WIDTH, 5, ILI9340_BLACK);
 
     // now minf/minv has the aprox resonant freq
 
@@ -128,7 +128,7 @@ void makeCCalcs() {
     makeScan2Flash(136, false);
 
     // erase bar
-    tft.fillRect(0, 136, 320, 5, ILI9340_BLACK);
+    tft.fillRect(0, 136, TFT_WIDTH, 5, ILI9340_BLACK);
 
     // print freq
     tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);

@@ -56,7 +56,7 @@ void checkEncoder() {
 // draw the top box, the label depends on the mode
 void drawtopbox() {
   // rectangle is (y, x, +y, +x, color)
-  tft.drawRect(0, 0, 320, 20, ILI9340_WHITE);
+  tft.drawRect(0, 0, TFT_WIDTH, 20, ILI9340_WHITE);
   tft.fillRect(1, 1, 318, 18, ILI9340_BLUE);
   tft.setCursor(60, 3);
   tft.setTextColor(ILI9340_WHITE);
@@ -264,7 +264,7 @@ void setFreq(unsigned long f) {
     // set VFO freq to obtain a VFO_OFFSET, but
     // - below 70 Mhz we put the VFO above
     // - above 70 Mhz we put it below
-    if (f < 70000000)  Si.setFreq(0, f + vfoOffset);
+    if (f < UP_SHIFT)  Si.setFreq(0, f + vfoOffset);
     else               Si.setFreq(0, f - vfoOffset);
 
     // reset both PLLs
@@ -274,7 +274,7 @@ void setFreq(unsigned long f) {
 
 void drawMainVFObox() {
     // just draw the main VFO box
-    tft.drawRect(0, 22, 320, 64, ILI9340_WHITE);
+    tft.drawRect(0, 22, TFT_WIDTH, 64, ILI9340_WHITE);
 }
 
 

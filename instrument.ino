@@ -26,6 +26,10 @@
 // Use hardware SPI
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 
+// TFT dimensions
+#define TFT_WIDTH   320
+#define TFT_HEIGHT  240
+
 /*******************************************************************************
  *                        LCD coordinate model
  *
@@ -108,6 +112,11 @@ word pep[10];
 char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
 long  vfoOffset = VFO_OFFSET;
+
+// This is the freq in which we swap the VFO from a upper injection
+// to a lower injection, this brings a increase of about 1dB in the noise floor
+#define UP_SHIFT 190000000  // 190 MHz
+
 
 // define the mixing xtal and jumping
 // limits

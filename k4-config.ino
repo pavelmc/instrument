@@ -9,7 +9,7 @@
 // settings menu
 void settings() {
     // draw the main box
-    tft.drawRect(0, 22, 320, 218, ILI9340_WHITE);
+    tft.drawRect(0, 22, TFT_WIDTH, 218, ILI9340_WHITE);
 
     // set text size
     tft.setTextSize(2);
