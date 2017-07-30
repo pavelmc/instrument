@@ -32,7 +32,7 @@ void printSpan() {
     tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
     tft.setCursor(12, 74);
     tft.setTextSize(2);
-    tft.print("SPAN: ");
+    tft.print((char *)"SPAN: ");
 
     // span
     tft.setCursor(80, 74);
@@ -141,41 +141,8 @@ void makeScan() {
     //define last x
     word lx = 0;
 
-    // initial scan into SPIFLASH
-    flashNext();    // increment the position
-
-    // do the scan to flash
-    for (hs = scan_low; hs < scan_high; hs += sstep) {
-        //set the frequency
-        setFreq(hs);
-
-        // allow a time to settle
-        delay(SCAN_PAUSE);
-
-        // take samples and convert it to mV
-        takeADCSamples();
-
-        // start point settings at first time
-        if (hs == scan_low) {
-            // reset the low and hig parameters
-            minf = maxf = scan_low;
-
-            // set min/max to this parameter
-            minv = maxv = vl;
-        }
-
-        //track min/max
-        trackMinMax(vl, hs);
-
-        // write to FLASH
-        flashWriteData(count, hs);
-
-        // count increase
-        count += 1;
-
-        // we need to update the bar here, TODO
-        tft.fillRect(0, 140, count, 5, ILI9340_GREEN);
-    }
+    // cal the scan process
+    makeScan2Flash(140, true);
 
     // calculate the range for the display
     word span = maxv - minv;
@@ -215,7 +182,7 @@ void makeScan() {
 
     #ifdef DEBUG
         // print serial headers
-        Serial.println("freq;load");
+        Serial.println((char *)"freq;load");
     #endif
 
     // draw and spit via serial
@@ -250,7 +217,7 @@ void makeScan() {
 
     // min value
     tft.setCursor(5, 215);
-    tft.print("MIN:");
+    tft.print((char *)"MIN:");
     minmaxSweepValue(minv);
     tft.setCursor(28, 215);
     tft.print(f);
@@ -261,7 +228,7 @@ void makeScan() {
     // max value
 
     tft.setCursor(230, 215);
-    tft.print("MAX:");
+    tft.print((char *)"MAX:");
     minmaxSweepValue(maxv);
     tft.setCursor(253, 215);
     tft.print(f);
@@ -389,7 +356,7 @@ void showDB() {
     bw6db = fdb6e - fdb6s;
 
     #ifdef DEBUG
-        Serial.println("3dB");
+        Serial.println((char *)"3dB");
         Serial.print(bw3db);
         Serial.print(";");
         Serial.print(fdb3s);
@@ -408,7 +375,7 @@ void showDB() {
 
     // -3dB label ------------------
     tft.setCursor(6, 152);
-    tft.print("-3dB BW: ");
+    tft.print((char *)"-3dB BW: ");
 
     // -3db val
     tft.setCursor(130, 152);
@@ -427,7 +394,7 @@ void showDB() {
     // -6dB label ------------------
     tft.setTextColor(ILI9340_YELLOW);
     tft.setCursor(6, 192);
-    tft.print("-6dB BW: ");
+    tft.print((char *)"-6dB BW: ");
 
     // -6db val
     tft.setCursor(130, 192);
@@ -442,4 +409,46 @@ void showDB() {
     tft.setCursor(160, 212);
     prepFreq4Print(fdb6e, true);
     tft.print(f);
+}
+
+
+// initial scan into SPIFLASH, the pos is for the bar
+void makeScan2Flash(byte pos, bool write2flash) {
+    // increment the position
+    if (write2flash == true) flashNext();
+    word count = 0;
+    unsigned long hs;
+
+    // do the scan to flash
+    for (hs = scan_low; hs < scan_high; hs += sstep) {
+        //set the frequency
+        setFreq(hs);
+
+        // allow a time to settle
+        delay(SCAN_PAUSE);
+
+        // take samples and convert it to mV
+        takeADCSamples();
+
+        // start point settings at first time
+        if (hs == scan_low) {
+            // reset the low and hig parameters
+            minf = maxf = scan_low;
+
+            // set min/max to this parameter
+            minv = maxv = vl;
+        }
+
+        //track min/max
+        trackMinMax(vl, hs);
+
+        // save to flash only if needen
+        if (write2flash == true) flashWriteData(count, hs);
+
+        // count increase
+        count += 1;
+
+        // we need to update the bar here, TODO
+        tft.fillRect(0, pos, count, 5, ILI9340_GREEN);
+    }
 }

@@ -73,6 +73,11 @@ void changeMode() {
         // draw the PC interface
         showPCMode();
     }
+    // LC
+    if (mode == MODE_LC) {
+        // draw the LC interface
+        lcInterface();
+    }
     // CONFIGURE
     if (mode == MODE_CONFIG) {
         // draw the Configurations menu

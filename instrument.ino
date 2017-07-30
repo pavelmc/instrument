@@ -192,9 +192,10 @@ byte smode = mode;      // selected mode in the menu selection
 #define MODE_SWEEP      2
 #define MODE_METER      3
 #define MODE_SA         4
-#define MODE_PC         5
-#define MODE_CONFIG     6
-#define MODE_COUNT      7
+#define MODE_LC         5
+#define MODE_PC         6
+#define MODE_CONFIG     7
+#define MODE_COUNT      8
 
 char *modeLabels[] = {
     "MODE SELECTOR",
@@ -202,6 +203,7 @@ char *modeLabels[] = {
     "SWEEP ANALYZER",
     "POWER METER",
     "SPECTRUM ANALYZER",
+    "INDUCTANCE METER",
     "COMPUTER MODE",
     "SETTINGS"
 };
@@ -260,8 +262,41 @@ word vm = 0;
 
 
 /***** meter mode vars and defines ******************************************/
+
 #define MEASURE_INTERVAL    250     // msecs
 unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
+
+
+/********************* LC vars **********************************************/
+byte kcaps[18] = {
+     5,         //  5p  50p 500p
+     8,         //  8p  80p 800p
+    10,         // 10p 100p 1n0
+    12,         // 12p 120p 1n2
+    15,         // 15p 150p 1n5
+    18,         // 18p 180p 1n8
+    20,         // 20p 200p 2n0
+    22,         // 22p 220p 2n2
+    24,         // 24p 240p 2n4
+    33,         // 33p 330p 3n3
+    39,         // 39p 390p 3n9
+    47,         // 47p 470p 4n7
+    52,         // 52p 520p 5n2
+    56,         // 56p 560p 5n6
+    68,         // 68p 680p 6n8
+    75,         // 75p 750p 7n5
+    82,         // 82p 820p 8n2
+    91,         // 91p 910p 9n2
+};
+
+#define CAP_MAX 17
+
+// cap index
+byte cindex = 0;
+// cap multiplier
+// final var is kcap[cindex] * 10^cmult
+byte cmult = 0;
+
 
 
 // the encoder need to move
@@ -298,6 +333,15 @@ void encoderMoved(char dir) {
     if (mode == MODE_CONFIG) {
         // showing or modifiying
         moveConfig(dir);
+    }
+
+    // LC
+    if (mode == MODE_LC) {
+        // move the cindex
+        cindex = moveWithLimits(cindex, dir, 0, CAP_MAX);
+
+        // update display
+        lcdUpdateC();
     }
 }
 

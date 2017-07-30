@@ -161,6 +161,13 @@ void prepFreq4Print(long fr, boolean doHz) {
  *****************************************************************************/
 void prepValue4Print(byte l) {
     switch (l) {
+        case 7:
+            // "965.536" u
+            strncat(f, &t[0], 3);
+            strcat(f, ".");
+            strncat(f, &t[3], 3);
+            break;
+
         case 6:
             // "65.536" u
             strncat(f, &t[0], 2);

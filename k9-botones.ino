@@ -86,10 +86,10 @@ void checkPushButton() {
         makeScan();
     }
 
-    // METER
-    if (mode == MODE_METER) {
-        // do change step
-        changeStep(1);
+    // LC
+    if (mode == MODE_LC) {
+        // make calcs
+        makeCCalcs();
     }
 
     // CONFIG
@@ -195,10 +195,16 @@ void bMagicClick() {
         changeMode();
     }
 
-    //~ // METER
-    //~ if (mode == MODE_METER) {
-        //~ // NOOP
-    //~ }
+    // LC
+    if (mode == MODE_LC) {
+        // change to sweep mode
+        mode = MODE_SWEEP;
+        changeMode();
+        // Set min level freq as center of the scan and
+        // re do the scan
+        *mainFreq = minf;
+        makeScan();
+    }
 
     //~ // CONFIG
     //~ if (mode == MODE_CONFIG) {
@@ -267,6 +273,15 @@ void bLeftClick() {
         //~ // NOOP
     //~ }
 
+    // LC
+    if (mode == MODE_LC) {
+        // move the cmult
+        cmult = moveWithLimits(cmult, -1, 0, 3);
+
+        // update display
+        lcdUpdateC();
+    }
+
     // CONFIG
     if (mode == MODE_CONFIG) {
         // mover el paso detras
@@ -301,6 +316,15 @@ void bRightClick() {
     //~ if (mode == MODE_METER) {
         //~ // NOOP
     //~ }
+
+    // LC
+    if (mode == MODE_LC) {
+        // move the cmult
+        cmult = moveWithLimits(cmult, +1, 0, 3);
+
+        // update display
+        lcdUpdateC();
+    }
 
     // CONFIG
     if (mode == MODE_CONFIG) {
