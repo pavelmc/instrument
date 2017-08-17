@@ -5,6 +5,7 @@
  * Email: pavelmc@gmail.com
  ****************************************************/
 
+
 /********** DEBUG MODE *************************/
 // uncomment this to get a few hits via serial
 //#define DEBUG true
@@ -108,26 +109,20 @@ long vfoA = 100000000L;     // VFO A
 long vfoB =   7110000L;     // VFO B
 long *mainFreq;             // main freq, the one it's used now
 long *subFreq;              // the one in reserve
-word pep[10];
 char f[15];            // this is the frequency box like "145.170.670"
 int ppm = 3670;        // this is the correction value for the si5351
 long  vfoOffset = VFO_OFFSET;
 
-// This is the freq in which we swap the VFO from a upper injection
-// to a lower injection, this brings a increase of about 1dB in the noise floor
-#define UP_SHIFT 190000000  // 190 MHz
-
-
 // define the mixing xtal and jumping
 // limits
 #define LIMI_LOW       100000   // 100 kHz
-#define LIMI_HIGH   220000000   // 220 MHz
+#define LIMI_HIGH   196000000   // 220 MHz
 
 
 /****** SWEEP related defines and vars **************************************/
 byte sspan = 2;
 
-unsigned long sweep_spans[] = {
+const unsigned long sweep_spans[] = {
     320,            // 320
     1000,           // 1k
     3000,           // 3k
@@ -143,7 +138,7 @@ unsigned long sweep_spans[] = {
     300000000       // 300MHz
 
 };
-char *sweep_spans_labels[] = {
+const char *sweep_spans_labels[] = {
     "  320Hz",
     "1.00kHz",
     "3.00kHz",
@@ -170,7 +165,7 @@ long minf, maxf;    // min/max feq values
 word minv, maxv;
 
 // the delay pause, in milli seconds after each pause
-#define SCAN_PAUSE  3
+#define SCAN_PAUSE  5
 
 // vard related to -3 & -6 db points
 // levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
@@ -206,7 +201,7 @@ byte smode = mode;      // selected mode in the menu selection
 #define MODE_CONFIG     7
 #define MODE_COUNT      8
 
-char *modeLabels[] = {
+const char *modeLabels[] = {
     "MODE SELECTOR",
     "SIGNAL GENERATOR",
     "SWEEP ANALYZER",
@@ -219,7 +214,7 @@ char *modeLabels[] = {
 
 /***** Step related vars en defines *****************************************/
 byte step = 2;  // 100Hz
-char *stepLabels[] = {
+const char *stepLabels[] = {
     "   1Hz",
     "  10Hz",
     " 100Hz",
@@ -234,7 +229,7 @@ char *stepLabels[] = {
 
 /****** config / settings vars and define ***********************************/
 byte config = 0;
-char *configLabels[] = {
+const char *configLabels[] = {
     "Si5351 PPM",
     "VFO Offset {IF}"
 };
@@ -277,7 +272,7 @@ unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
 
 
 /********************* LC vars **********************************************/
-byte kcaps[18] = {
+const byte kcaps[18] = {
      5,         //  5p  50p 500p
      8,         //  8p  80p 800p
     10,         // 10p 100p 1n0

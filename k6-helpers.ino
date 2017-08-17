@@ -261,11 +261,8 @@ void setFreq(unsigned long f) {
          Si.setFreq(2, f);
     }
 
-    // set VFO freq to obtain a VFO_OFFSET, but
-    // - below 70 Mhz we put the VFO above
-    // - above 70 Mhz we put it below
-    if (f < UP_SHIFT)  Si.setFreq(0, f + vfoOffset);
-    else               Si.setFreq(0, f - vfoOffset);
+    // set VFO freq to obtain a VFO_OFFSET
+    Si.setFreq(0, f + vfoOffset);
 
     // reset both PLLs
     Si.reset();

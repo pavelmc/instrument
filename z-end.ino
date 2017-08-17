@@ -9,7 +9,7 @@
 // setup
 void setup() {
     // serial int
-    Serial.begin(57600);   // 1/4 Mbps
+    Serial.begin(115200);   // 1/8 Mbps
 
     // frequency pointer settings
     mainFreq = &vfoA;     // main freq, the one it's used now
@@ -47,8 +47,8 @@ void setup() {
     Si.correction(ppm);
 
     // set power
-    Si.setPower(0, 0);
-    Si.setPower(2, 0);
+    Si.setPower(0, 0);      // mixer
+    Si.setPower(2, 0);      // RF
 
     // enable outputs
     Si.enable(0);

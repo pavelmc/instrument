@@ -52,8 +52,14 @@ void serialComms() {
                 // allow a time to settle
                 delay(SCAN_PAUSE);
             } else {
-                // send value via serial
-                sendVal();
+                // delay to cope with spurs
+                delay(SCAN_PAUSE);
+
+                // Read ad values
+                takeADCSamples();
+
+                // send raw values via serial
+                Serial.println(vrl);
             }
 
             // reset counter and blank string
@@ -61,18 +67,6 @@ void serialComms() {
             sb[sbc] = 0;
         }
     }
-}
-
-
-
-// send val of the reading for the actual VFO
-void sendVal() {
-    // Read ad values and calc mvolts (again)
-    takeADCSamples();
-
-    // send values via serial
-    Serial.print(vl);
-    Serial.println("");
 }
 
 
