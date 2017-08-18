@@ -35,7 +35,7 @@ SERIALPORT_SPEED = 115200
 SERIALPORT_TIMEOUT = 0.07
 
 # adc oversampling factor
-ADC_OVERSAMPLING = 3
+ADC_OVERSAMPLING = 4
 average_max = 11 # the number you want + 1
 
 sampleList = [50, 100, 200, 500, 1000, 2000, 4000, 8000] # samples per sweep
@@ -52,15 +52,18 @@ simserial = False
 
 # get a list of valid ports
 def get_serial_ports():
-    # get the list of ports on this system
-    ports = [port[0] for port in serialdevs.comports()]
+    ports = []
+    # get the list of ports on this system, with a description
+    for port in serialdevs.comports():
+        ports.append([port[0],port[1]])
 
     # fail safe for no valid ports: we need to show something
+    # in this case default fake ports
     if len(ports) == 0:
-        if os.name == 'nt':
-            ports.append('COM1')
+        if os.name == "nt":
+            ports.append(["COM1", "Fake port"])
         else:
-            ports.append('/dev/ttyS0')
+            ports.append(["/dev/ttyS0", "Fake port"])
 
     return ports
 
@@ -141,6 +144,7 @@ class MyMplCanvas(FigureCanvas):
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
 
+    # create it
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QTimer(self)
@@ -157,13 +161,14 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.limits = list("0000")
 
         # coordinates format
-        #self.format_coord = self.coord_format
+        self.axes.format_coord = self.coord_format
 
         # draw the graph, modified flag
         self.modified = True
         self.update_it()
 
 
+    # update it
     def update_it(self):
         # check if its has been modified
         if (self.modified == False):
@@ -176,6 +181,11 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
         # set the data for the plot
         self.axes.plot(self.x, self.y)
+
+        # title and labels
+        self.axes.set_title('Sweep Freq vs. level')
+        self.axes.set_ylabel('Level in dB')
+        self.axes.set_xlabel('Frequency in Mhz')
 
         # turn on grid
         self.axes.grid(True)
@@ -221,7 +231,8 @@ class MyDynamicMplCanvas(MyMplCanvas):
     # format the position in the coordinates
     # to set the real y value, not the position
     def coord_format(self, x, y):
-        return "F=%.3f, l=%.3f" % (x, self.y[self.x.find(x)])
+        # ident index to know y value
+        return "%.3f MHz (%.3f dB)" % (x, y)
 
 
 # main app
@@ -271,9 +282,10 @@ class ApplicationWindow(QMainWindow):
 
         # combo boxes
         # device and populate it
+        self.avail_serial = get_serial_ports()
         self.cbdevice = QComboBox()
-        for port in get_serial_ports():
-            self.cbdevice.addItem(port)
+        for (p, pdesc) in self.avail_serial:
+            self.cbdevice.addItem("%s (%s)" % (p, pdesc))
 
         # samples and populate it
         self.cbsamples = QComboBox()
@@ -491,18 +503,19 @@ class ApplicationWindow(QMainWindow):
         index = 0
         f = self.start
         dbm = 0.0
-        scale = 1024.0 * self.adcScale
+        scale = 1023.0 * self.adcScale
 
         # clean serial buffer
         self.serial_clean()
 
-        while (index < self.samples):
+        while(index < len(self.graph.x)):
             #check if run mode has changed to break the loop
             if (self.runMode == 0):
                 self.set_status_msg("Scan stoped by user request")
                 break
 
-            # set freq on device, python 3 handle all strings as unicode, GGGRRRR
+            # set freq on device
+            # python 3 handle all strings as unicode
             ret = str("\n").encode()
             setf = str(f).encode()
             self.serial.write(setf + ret)
@@ -611,13 +624,13 @@ class ApplicationWindow(QMainWindow):
         if (self.workingSerial == False):
             try:
                 # must open serial port
-                #~ try:
                 self.serial = serial.Serial(
-                            get_serial_ports()[self.cbdevice.currentIndex()],
+                            self.avail_serial[
+                            self.cbdevice.currentIndex()][0],
                             SERIALPORT_SPEED,
                             timeout=SERIALPORT_TIMEOUT)
 
-                # arduino boot time, around 4 seconds
+                # arduino boot time, around 5 seconds
                 self.set_status_msg("Please wait while Arduino reboots", 4000)
 
                 # responsive wait: 5 seconds
@@ -631,8 +644,6 @@ class ApplicationWindow(QMainWindow):
                 # now we are talking
                 self.workingSerial = True
 
-                # restore default timeout
-                self.serial.timeout = SERIALPORT_TIMEOUT
             except Exception:
                 self.set_status_msg("Error! Serial port can't be opened")
                 return
@@ -701,11 +712,6 @@ class ApplicationWindow(QMainWindow):
 
     # set reference
     def set_ref(self):
-        # DEBUG
-        print("Status")
-        print("refActive: %i" % self.refActive)
-        print("scanCompleted: %i" % self.scanCompleted)
-
         # process and take/left the reference
         if (self.refActive == True):
             # deactivate
@@ -755,4 +761,3 @@ aw = ApplicationWindow()
 aw.setWindowTitle("%s" % progname)
 aw.show()
 sys.exit(qApp.exec_())
-#qApp.exec_()
