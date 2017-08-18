@@ -45,7 +45,7 @@ void checkInitEEPROM() {
 // it actually only write a cell if it has changed
 void saveEEPROM() {
     // load the parameters in the environment
-    // conf.ver = VERSIOON;     // no need to, this is the default
+    // conf.ver = VERSION;     // no need to, this is the default
     conf.vfoa           = vfoA;
     conf.vfob           = vfoB;
     conf.step           = step;

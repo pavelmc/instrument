@@ -83,16 +83,14 @@ unsigned long btnDownTime = 0;
 // lib instantiation as "Si"
 #include "si5351mcu.h"
 Si5351mcu Si;
-//~ #include <si5351light.h> // https://github.com/etherkit/Si5351Arduino/releases/tag/v2.0.1
-//~ Si5351light Si;
 
 // analog buttons
-#define BUTTONS_COUNT 8     // just 4 buttons
+#define BUTTONS_COUNT 4     // just 4 buttons
 #include <BMux.h>
 #define ANALOG_PIN A0
 
-// Creating the AnalogButtons2 instance;
-// 5 msec of debounce and 20 units of tolerance
+// Creating the AnalogButtons instance;
+// defauult 5 msec of debounce and 20 units of tolerance
 BMux abm;
 
 
@@ -116,7 +114,7 @@ long  vfoOffset = VFO_OFFSET;
 // define the mixing xtal and jumping
 // limits
 #define LIMI_LOW       100000   // 100 kHz
-#define LIMI_HIGH   196000000   // 220 MHz
+#define LIMI_HIGH   196000000   // 196 MHz
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -164,7 +162,8 @@ long scan_low, scan_high, sstep;
 long minf, maxf;    // min/max feq values
 word minv, maxv;
 
-// the delay pause, in milli seconds after each pause
+// the delay pause, in milli seconds after each freq set
+// to avoid the click on the Si5351 and allow the voltage to settle
 #define SCAN_PAUSE  5
 
 // vard related to -3 & -6 db points
@@ -178,13 +177,13 @@ long bw3db, bw6db;
 
 /****************** FLASH related vars ***********************************/
 
-//declare some vars related to the spi flash
+// declare some vars related to the spi flash
 byte flashDataPerPage;  // how many data object we have per page of 256 bytes
-byte flashPagesInAScan; // cuantas páginas se lleva un scan.
+byte flashPagesInAScan; // How many pages a scan covers.
 word flashMaxScans;     // the amount of scans we dispose of
 word flashPosition;     // the object space in the flash at we are now
 
-// length of the data to write
+// length of the data to write to the SPI flash
 #define DATA_LEN    6 // bytes
 
 
@@ -194,8 +193,8 @@ byte smode = mode;      // selected mode in the menu selection
 #define MODE_MENU       0
 #define MODE_SIGEN      1
 #define MODE_SWEEP      2
-#define MODE_METER      3
-#define MODE_SA         4
+#define MODE_SA         3
+#define MODE_METER      4
 #define MODE_LC         5
 #define MODE_PC         6
 #define MODE_CONFIG     7
@@ -205,8 +204,8 @@ const char *modeLabels[] = {
     "MODE SELECTOR",
     "SIGNAL GENERATOR",
     "SWEEP ANALYZER",
-    "POWER METER",
     "SPECTRUM ANALYZER",
+    "POWER METER",
     "INDUCTANCE METER",
     "COMPUTER MODE",
     "SETTINGS"
@@ -233,6 +232,7 @@ const char *configLabels[] = {
     "Si5351 PPM",
     "VFO Offset {IF}"
 };
+
 boolean confSelected = false;
 #define CONF_COUNT      2
 
@@ -243,10 +243,9 @@ char empty[] = "     ";    // "empty" string to copy from
 
 
 /****** ADC related vars ******************************************************
- *  A0 = Vrs    voltage raw (adc) source
- *  A1 = Vr50   voltage raw (adc) over 50 ohms resistor
- *  A2 = Vro    voltage raw (adc) output
- *  A3 = Vrl    voltage raw (adc) load
+ *  A0 = {Reserverd for the analog buttons}
+ *  A1 = vrl, vl: voltages in the load (sweeper) in raw adc unites / mv *10
+ *  A2 = vrm, vm: voltages in the meter in raw adc unites / mv *10
  *
  ******************************************************************************/
 #define ADC_M   (A1)
@@ -254,13 +253,13 @@ char empty[] = "     ";    // "empty" string to copy from
 
 // raw vars in ADC units (0-1023)
 word vrl = 0;
-word vbm = 0;
+word vrm = 0;
 
 // final values in mv * 10
 word vl = 0;
 word vm = 0;
 
-// ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
+// ADC samples for oversampling, the real value is ADC_SAMPLES / ADC_DIVIDER
 #define ADC_SAMPLES     40  // WATCH OUT ! max = 63
 #define ADC_DIVIDER     10
 
@@ -272,6 +271,8 @@ unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
 
 
 /********************* LC vars **********************************************/
+// fell free to add your values here if you need more, please increment the
+// var below if you do so
 const byte kcaps[18] = {
      5,         //  5p  50p 500p
      8,         //  8p  80p 800p
@@ -297,10 +298,10 @@ const byte kcaps[18] = {
 
 // cap index
 byte cindex = 0;
+
 // cap multiplier
 // final var is kcap[cindex] * 10^cmult
 byte cmult = 0;
-
 
 
 // the encoder need to move

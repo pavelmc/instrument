@@ -5,6 +5,26 @@
  * Email: pavelmc@gmail.com
  ****************************************************/
 
+/*************************************************************************
+ * SPI flash are not the same as an EEPROM, data must be write /read in
+ * a way that data doesn't write over a data page we must use a trick
+ *
+ * The mem is structured in data pages of 256 bytes long usually,
+ * we use a W25Q32 that has a length of 16384 pages of 256 bytes
+ *
+ * You can use any SPI Flash supported or compatible with the SPIFlash lib
+ * as this mechanism will compute the required values and will keep up
+ * no matter what size of the flash its.
+ *
+ * SPI flash are finite on writes and are not meant to be used as RAM
+ * as in here, so I made a trick, I write each scan data in a new slice
+ * of the mem, in my case with a 32 Mbit flash its about 240 slices (scans)
+ * before we start to overwrite it.
+ *
+ * Datasheets states about 100k for sure writes, with this trick we have
+ * about 24 M writes before the SPI broke, that's enough for me...
+ ************************************************************************/
+
 
 //flash calcs, settings for some var at setup
 void flashCalcs() {
@@ -20,15 +40,8 @@ void flashCalcs() {
     flashMaxScans = (word)(flash.getMaxPage() / flashPagesInAScan);
 }
 
+
 // calc position
-/*************************************************************************
- * SPI flash are not the same as a EEPROM
- * The mem is structured in data pages of 256 bytes long usually
- * we use a W25Q32 that has a lenght of 16384 pages
- *
- * So data mus be write /read in a way that data doesn't write over a data page
- * We use a trick
- ************************************************************************/
 unsigned long getFlashPos(word index) {
     // working vars
     unsigned long pos;
@@ -78,7 +91,7 @@ unsigned long flashReadData(word index) {
 }
 
 
-// init a new cycle of writes for the spiflash
+// Init a new cycle of writes for the spiflash.
 void flashNext() {
     // at every scan init we increment this or fold back if at end
     flashPosition += 1;

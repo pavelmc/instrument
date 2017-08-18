@@ -41,18 +41,14 @@ void setup() {
     Si.off();
 
     // now we have the Si5351 off, we take the base readings for the meter
-    vbm = takeSample(ADC_M);
+    vrm = takeSample(ADC_M);
 
     // set & apply my calculated correction factor
     Si.correction(ppm);
 
-    // set power
+    // set power (also enables the output in the process)
     Si.setPower(0, 0);      // mixer
     Si.setPower(2, 0);      // RF
-
-    // enable outputs
-    Si.enable(0);
-    Si.enable(2);
 
     // pre-load the output freq
     setFreq(vfoA);

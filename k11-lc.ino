@@ -99,17 +99,18 @@ long getcap() {
 /****************************************************************************
  * The algorithm is like this
  *
- * - Make a scan from 0.1 MHz to 220.0 MHz
+ * - Make a scan from min to max
  *      detect the minimum
  * - Make a second scan with a span of 3 Mhz and centered on the min
  *      detect the minimum
- * - check freq, if less than 1Mhz bad result, else calc the value and show.
+ * - calc L
+ * - Show L
  *****************************************************************************/
 void makeCCalcs() {
     // set scan parameters for the first round
-    scan_low  =   1000000;                   //   1.0 Mhz
-    scan_high = 220000000;                   // 220.0 MHz
-    sstep = (scan_high - scan_low) / TFT_WIDTH;   // ~640 khz
+    scan_low  = LIMI_LOW;
+    scan_high = LIMI_HIGH;
+    sstep = (scan_high - scan_low) / TFT_WIDTH;
 
     // make first scan
     makeScan2Flash(136, false);

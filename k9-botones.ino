@@ -43,7 +43,7 @@ void checkButton() {
 }
 
 
-// declaración de las rutinas de botones
+// buttons definition
 /******************************************************************************
  *   MENU       MAGIC         <(LEFT)         >(RIGHT)
  *
@@ -53,12 +53,12 @@ void checkButton() {
  *      OTHER = go to menu mode
  *  Hold = Cambia vfoA <> vfoB
  * MAGIC
- *  Click = opciones muy usuales según el modo
+ *  Click = usual mod by mode
  *  Hold = SWEEP = DB limits
- * < minimo o izquierda
- * > maximo o derecha
+ * < min of left
+ * > max or rigth
  *
- * Además esta el botón del push es es "OK" o select
+ * encoder push is OK
  *
  *****************************************************************************/
 
@@ -136,14 +136,14 @@ void checkHoldButton() {
 
 // MENU button click
 void bMenuClick() {
-    // si estamos en un modo retorna a modo menu, s no es como el OK
+    // if not in menu return to it
+    // if in menu just like OK
     if (mode != MODE_MENU) {
-        // no importa donde, simplemente retornar al menu
+        // return to menu
         mode = MODE_MENU;
         changeMode();
     } else {
-        // estamos en modo menu
-        // aplicamos la opción seleccionada
+        // we are in menu, just like OK
         mode = smode;
         changeMode();
     }
@@ -155,7 +155,7 @@ void bMenuClick() {
 
 // MENU button hold
 void bMenuHold() {
-    // no importa donde, cambiar los VFOs
+    // switch VFOs
     long temp = vfoB;
     vfoB = vfoA;
     vfoA = temp;
@@ -163,7 +163,7 @@ void bMenuHold() {
     // set freq
     setFreq(*mainFreq);
 
-    // actualizar la interface
+    // update interface
     changeMode();
 
     // save settings on exit
@@ -335,7 +335,7 @@ void bRightClick() {
 
 
 /******************************************************************************
- *  Creando botones, tiene su contrapartida en setup, ver
+ * create the buttons, it has the next part in z-end file, check there
  *****************************************************************************/
 
 // menu

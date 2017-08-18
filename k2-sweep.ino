@@ -11,7 +11,7 @@ void sweep_box() {
     // main box
     tft.drawRect(0, 22, TFT_WIDTH, 44, ILI9340_WHITE);
 
-    // VFO Primario
+    // main vfo
     mainFreqPrint();
 
     // lower box
@@ -99,7 +99,7 @@ void moveSpanUpdate(char dir) {
  * we must calc
  *      scan_low = scan init
  *      scan_high = scan end
- *      sstep = scan step ( = sweep_spans[sspan] / TFT_WIDTH) in hz
+ *      sstep = scan step (sweep_spans[sspan] / TFT_WIDTH) in hz
  *
  * We need to define and keep account of min an max
  *      minf = freq of the minimum value
@@ -152,7 +152,7 @@ void makeScan() {
 
     // calc min/max
     word tftmin;
-    if (rangeEdges > minv)    tftmin = 0;     // no pude ser menor que cero
+    if (rangeEdges > minv)    tftmin = 0;     // can't be less than zero
     else    tftmin = minv - rangeEdges;
 
     // max limit
@@ -171,11 +171,10 @@ void makeScan() {
 
     // determine -6dB, -3dB & -1dB; 89.12
     dB05l = (word)(maxv * 8912L / 10000);        // -0.5dB aka max * 0.8912
-    dB1l  = (word)(maxv * 794L  / 1000);          // -1dB aka max * 0.794
-    dB3l  = maxv / 2;                            // -3dB aka max * 0.5
-    dB6l  = maxv / 4;                            // -6dB aka max * 0.25
-    dB9l  = maxv / 8;                            // -9dB aka max * 0.125
-    word color;
+    dB1l  = (word)(maxv * 794L  / 1000);         // -1dB   aka max * 0.794
+    dB3l  = maxv / 2;                            // -3dB   aka max * 0.5
+    dB6l  = maxv / 4;                            // -6dB   aka max * 0.25
+    dB9l  = maxv / 8;                            // -9dB   aka max * 0.125
 
     //  clean screen and draw graphic
     drawbars(tftmin, tftmax);
@@ -185,7 +184,7 @@ void makeScan() {
         Serial.println((char *)"freq;load");
     #endif
 
-    // draw and spit via serial
+    // draw and spit via serial if debug
     for (word i = 0; i < TFT_WIDTH; i++) {
         // read the value from FLASH
         hs = flashReadData(i);
@@ -226,7 +225,6 @@ void makeScan() {
     tft.print(f);
 
     // max value
-
     tft.setCursor(230, 215);
     tft.print((char *)"MAX:");
     minmaxSweepValue(maxv);
@@ -243,10 +241,10 @@ void drawbars(word tftmin, word tftmax) {
     // calc how many vertical lines
     byte bars = sweep_spans[sspan] % 3 ;
     if (bars == 0)
-        // multiple of 3 = 4 bars (2 on the center)
+        // multiple of 3 = 3 bars (2 on the center)
         bars = 3;
     else
-        // not mutiple of 3 = 5 bars (3 on the center)
+        // not mutiple of 3 = 4 bars (3 on the center)
         bars = 4;
 
     // erase the screen
@@ -309,10 +307,12 @@ void drawbars(word tftmin, word tftmax) {
 
 
 // print db lines
+// it has a ward mechanism: if it will be positioned beyond screen limits
+// it will not be printed, nice
 void printdBlines(int val, char *text) {
-    if (val > 8 and val < 232) {
+    if (val > 8 and val < (TFT_HEIGHT - 8)) {
         tft.drawLine(0, TFT_HEIGHT - val, TFT_WIDTH, TFT_HEIGHT - val, ILI9340_WHITE);
-        tft.setCursor(282, 232 - val);
+        tft.setCursor((TFT_WIDTH - 38), (TFT_HEIGHT - 8) - val);
         tft.print(text);
     }
 }
@@ -414,8 +414,9 @@ void showDB() {
 
 // initial scan into SPIFLASH, the pos is for the bar
 void makeScan2Flash(byte pos, bool write2flash) {
-    // increment the position
+    // increment the position, if instructed
     if (write2flash == true) flashNext();
+
     word count = 0;
     unsigned long hs;
 

@@ -52,32 +52,37 @@ void changeMode() {
         // draw the main menu
         menu();
     }
+
     // SIGNAL GENERATOR
     if (mode == MODE_SIGEN) {
         // draw the signal generator interface
         vfobox();
-        //~ scale(88);
     }
+
     // SWEEP & SA
     if (mode == MODE_SWEEP || mode == MODE_SA) {
         // draw the sweeper interface
         sweep_box();
     }
+
     // METER
     if (mode == MODE_METER) {
         // draw the meter interface
         showMeterMode();
     }
+
     // PC
     if (mode == MODE_PC) {
         // draw the PC interface
         showPCMode();
     }
+
     // LC
     if (mode == MODE_LC) {
         // draw the LC interface
         lcInterface();
     }
+
     // CONFIGURE
     if (mode == MODE_CONFIG) {
         // draw the Configurations menu

@@ -18,7 +18,7 @@ void back2menu() {
 long getStep() {
     // we get the step from the global step var
     // pow(10,step) is the ideal function here but that eats 6% of the firmware
-    // a that uses float/double math
+    // as that uses float/double math
     //
     // we create our own pow() function using longs
     long ret = 1;
@@ -83,66 +83,66 @@ void prepFreq4Print(long fr, boolean doHz) {
     byte l = strlen(t);     // 26630
 
     // check size
-    switch (l) {
-        case 2: // "90"
-            strncat(f, &empty[0], 5);   // "     "
-            strncat(f, &empty[0], 4);   //       "    "
-            strcat(f, t);               //            "90"
-            break;
+    /*** by using if instead of switch/case we save a few bytes ***/
 
-        case 3: // "900"
-            strncat(f, &empty[0], 5);   // "     "
-            strncat(f, &empty[0], 3);   //       "   "
-            strcat(f, t);               //           "900"
-            break;
+    if (l == 2) { // "90"
+        strncat(f, &empty[0], 5);   // "     "
+        strncat(f, &empty[0], 4);   //       "    "
+        strcat(f, t);               //            "90"
+    }
 
-        case 4: // "9.000"
-            strncat(f, &empty[0], 5);   // "     "
-            strncat(f, &empty[0], 1);   //       " "
-            strncat(f, &t[0], 1);       //        "9"
-            strcat(f, ".");             //          "."
-            strncat(f, &t[1], 3);       //            "000"
-            break;
+    if (l == 3) { // "900"
+        strncat(f, &empty[0], 5);   // "     "
+        strncat(f, &empty[0], 3);   //       "   "
+        strcat(f, t);               //           "900"
+    }
 
-        case 5: // "90.000"
-            strncat(f, &empty[0], 5);   // "     "
-            strncat(f, &t[0], 2);       //       "90"
-            strcat(f, ".");             //          "."
-            strncat(f, &t[2], 3);       //            "000"
-            break;
+    if (l == 4) { // "9.000"
+        strncat(f, &empty[0], 5);   // "     "
+        strncat(f, &empty[0], 1);   //       " "
+        strncat(f, &t[0], 1);       //        "9"
+        strcat(f, ".");             //          "."
+        strncat(f, &t[1], 3);       //            "000"
+    }
 
-        case 6: // "455.000"
-            strncat(f, &empty[0], 4);   // "    "
-            strncat(f, &t[0], 3);       //      "455"
-            strcat(f, ".");             //          "."
-            strncat(f, &t[3], 3);       //            "000"
-            break;
+    if (l == 5) { // "90.000"
+        strncat(f, &empty[0], 5);   // "     "
+        strncat(f, &t[0], 2);       //       "90"
+        strcat(f, ".");             //          "."
+        strncat(f, &t[2], 3);       //            "000"
+    }
 
-        case 7: // "1.840.000"
-            strncat(f, &empty[0], 2);   // "  "
-            strncat(f, &t[0], 1);       //    "1"
-            strcat(f, ".");             //      "."
-            strncat(f, &t[1], 3);       //        "840"
-            strcat(f, ".");             //            "."
-            strncat(f, &t[4], 3);       //              "000"
-            break;
+    if (l == 6) { // "455.000"
+        strncat(f, &empty[0], 4);   // "    "
+        strncat(f, &t[0], 3);       //      "455"
+        strcat(f, ".");             //          "."
+        strncat(f, &t[3], 3);       //            "000"
+    }
 
-        case 8: // "14.230.000"
-            strncat(f, &empty[0], 1);   // " "
-            strncat(f, &t[0], 2);       //   "14"
-            strcat(f, ".");             //      "."
-            strncat(f, &t[2], 3);       //        "230"
-            strcat(f, ".");             //            "."
-            strncat(f, &t[5], 3);       //              "000"
-            break;
+    if (l == 7) { // "1.840.000"
+        strncat(f, &empty[0], 2);   // "  "
+        strncat(f, &t[0], 1);       //    "1"
+        strcat(f, ".");             //      "."
+        strncat(f, &t[1], 3);       //        "840"
+        strcat(f, ".");             //            "."
+        strncat(f, &t[4], 3);       //              "000"
+    }
 
-        case 9: // "145.170.000"
-            strncat(f, &t[0], 3);       // "145"
-            strcat(f, ".");             //     "."
-            strncat(f, &t[3], 3);       //       "170"
-            strcat(f, ".");             //           "."
-            strncat(f, &t[6], 3);       //             "000"
-            break;
+    if (l == 8) { // "14.230.000"
+        strncat(f, &empty[0], 1);   // " "
+        strncat(f, &t[0], 2);       //   "14"
+        strcat(f, ".");             //      "."
+        strncat(f, &t[2], 3);       //        "230"
+        strcat(f, ".");             //            "."
+        strncat(f, &t[5], 3);       //              "000"
+    }
+
+    if (l == 9) { // "145.170.000"
+        strncat(f, &t[0], 3);       // "145"
+        strcat(f, ".");             //     "."
+        strncat(f, &t[3], 3);       //       "170"
+        strcat(f, ".");             //           "."
+        strncat(f, &t[6], 3);       //             "000"
     }
 
     // done; the result is in f, but without "Hz"
@@ -218,7 +218,7 @@ void prepValue4Print(byte l) {
 }
 
 
-//move a var between limits, usefull for options movement
+// move a var between limits, useful for options movement
 byte moveWithLimits(byte var, char dir, byte low, byte high) {
     // temp value
     int t = (int)var + dir;
@@ -235,21 +235,6 @@ byte moveWithLimits(byte var, char dir, byte low, byte high) {
 
 
 // set freq to the Si5351
-/***************************************************************************
- * We will move in two main steps, that must be coordinates
- *
- * 100.00 to 200.0 Mhz (VHF) => This will be direct trough a filter
- * 0.0 to 100.000 Mhz   (HF) => This will be a mix from the following
- *      Fix 200 Mhz reference + range from 100 to 200 Mhz (inverting)
- *
- * We will use D5 to signal the switch as this
- *  D5 low is VHF
- *  D5 high is HF
- *
- * We use the Si5351mcu lib
- *  CLK2 will be the VHF
- *  CLK0 will be the 220Mhz reference.
- ***************************************************************************/
 void setFreq(unsigned long f) {
     // set main RF
     // but desctivate it if SA mode
@@ -263,9 +248,6 @@ void setFreq(unsigned long f) {
 
     // set VFO freq to obtain a VFO_OFFSET
     Si.setFreq(0, f + vfoOffset);
-
-    // reset both PLLs
-    Si.reset();
 }
 
 
@@ -331,10 +313,10 @@ unsigned long mV2mW(word mv) {
 
 // convert mV *10 to dBm * 10
 int mW2dBm(word mw) {
-    /************************************************
+    /*********************************************************************
      * dBm is 10 * log10(mw)
      *
-     * but we areworking in mW *10, so the formula remains as is
+     * but we areworking in mW * 10, so the formula remains as is
      *
      * just you need to substract 10 to the result
      *
@@ -366,26 +348,4 @@ void minmaxSweepValue(word value) {
     //strcat(f, " mV");
 
     // ready to print in the f[] buffer
-}
-
-
-// calc SWR * 10
-word swr(word vfwd, word vrev) {
-    long up = vfwd;
-
-    // case 1:1
-    if (vrev == vfwd) {
-        return (word)10;
-    } else {
-        if (vfwd < vrev) {
-            up = vrev;
-            vrev = vfwd;
-        }
-
-        up += vrev;
-        up *= 10;
-        up /= (up - vrev);
-
-        return (word)up;
-    }
 }

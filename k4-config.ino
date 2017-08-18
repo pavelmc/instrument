@@ -16,7 +16,6 @@ void settings() {
     tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
 
     for (byte i = 0; i < CONF_COUNT; i++) {
-
         // print the mode number, activated or not.
         tft.setCursor(12, 52 + 26 * i);
         // mark if selected
@@ -103,6 +102,7 @@ void showPPM() {
     // print it
     tft.print(f);
 }
+
 
 void showOffset() {
     // reset the print buffers

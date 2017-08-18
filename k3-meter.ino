@@ -26,15 +26,15 @@ void powerMeasureAndShow() {
 }
 
 
-// mostrar la interfaz
+// show the interface
 void showMeterMode() {
-    // linea externa
+    // outer box
     drawMainVFObox();
 
-    // VFO Primario
+    // mV level as main
     printLevelmV();
 
-    // VFO primario pero como el sec
+    // main VFO in the pos of the sub
     subFreqPrint(false);
 
     // step print
@@ -59,6 +59,7 @@ void printLevelmV() {
     // add the mv at the end
     if (l < 6) strcat(f, " mV");
     else       strcat(f, " V");
+
     // 2 empty chars at the end
     strncat(f, &empty[0], 2);
 
@@ -89,6 +90,7 @@ void printLevelmW() {
     // add the unit, as we will measure tops 0.5W, we will
     // use just mW
     strcat(f, " mW");
+
     // 2 empty chars at the end
     strncat(f, &empty[0], 2);
 
@@ -102,7 +104,8 @@ void printLevelmW() {
 }
 
 
-// print level in dBm at load
+// print level in dBm at load.
+// WATCH OUT! it has limited resolution by the way it's calculated
 void printLeveldBm() {
     // calc
     int dBm = mW2dBm(mV2mW(vm));

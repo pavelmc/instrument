@@ -10,14 +10,15 @@
 /******************************************************************************
  * This is the main interaction with the PC.
  * -> Send a freq + "\n" and we set the VFO to that (ex: "7110000\n")
- * -> Send just a "\n" and we answer with the reading of the level.
+ * -> Send just a "\n" and we answer with the reading of the level
+ *  in raw ADC units
  *
  * All answers are terminated with an "\n"
  *
  * As simple as that.
  *
  * BEWARE!
- * You must wait at least 5 msec between the freq command and the data reading
+ * there is a delay between the freq command and the data reading.
  *
  ******************************************************************************/
 void serialComms() {
