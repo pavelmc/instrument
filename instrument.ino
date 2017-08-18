@@ -261,7 +261,7 @@ word vl = 0;
 word vm = 0;
 
 // ADC samples for uversampling, the real value is ADC_SAMPLES / ADC_DIVIDER (4)
-#define ADC_SAMPLES     30  // WATCH OUT ! max = 63
+#define ADC_SAMPLES     40  // WATCH OUT ! max = 63
 #define ADC_DIVIDER     10
 
 
