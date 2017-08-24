@@ -30,6 +30,11 @@ Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 // TFT dimensions
 #define TFT_WIDTH   320
 #define TFT_HEIGHT  240
+// some needed for scale
+#define TFTH_13      TFT_HEIGHT / 3
+#define TFTH_12      TFT_HEIGHT / 2
+#define TFTH_23      TFTH_13 * 2
+
 
 /*******************************************************************************
  *                        LCD coordinate model
@@ -99,8 +104,8 @@ BMux abm;
 
 // vars
 
-// this is the IF at 27 Mhz with a homebrew filter
-#define VFO_OFFSET      26994200        // default value
+// this is the IF at 10.7 Mhz
+#define VFO_OFFSET      10702400       // default value
 
 /****** Frequency control related ******************************************/
 long vfoA = 100000000L;     // VFO A
@@ -108,13 +113,13 @@ long vfoB =   7110000L;     // VFO B
 long *mainFreq;             // main freq, the one it's used now
 long *subFreq;              // the one in reserve
 char f[15];            // this is the frequency box like "145.170.670"
-int ppm = 3670;        // this is the correction value for the si5351
+int ppm = 3650;        // this is the correction value for the si5351
 long  vfoOffset = VFO_OFFSET;
 
 // define the mixing xtal and jumping
 // limits
 #define LIMI_LOW       100000   // 100 kHz
-#define LIMI_HIGH   196000000   // 196 MHz
+#define LIMI_HIGH   224000000 - vfoOffset  // ~200 MHz
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -160,19 +165,19 @@ long scan_low, scan_high, sstep;
 
 // measure limits
 long minf, maxf;    // min/max feq values
-word minv, maxv;
+int minv, maxv;
 
 // the delay pause, in milli seconds after each freq set
 // to avoid the click on the Si5351 and allow the voltage to settle
 #define SCAN_PAUSE  5
 
-// vard related to -3 & -6 db points
-// levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
-word dB05l, dB1l, dB3l, dB6l, dB9l;
+//~ // vard related to -3 & -6 db points
+//~ // levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
+//~ int dB05l, dB1l, dB3l, dB6l, dB9l;
 
-// variable for the db
-long fdb3s, fdb3e, fdb6s, fdb6e;
-long bw3db, bw6db;
+//~ // variable for the db
+//~ long fdb3s, fdb3e, fdb6s, fdb6e;
+//~ long bw3db, bw6db;
 
 
 /****************** FLASH related vars ***********************************/
@@ -244,25 +249,31 @@ char empty[] = "     ";    // "empty" string to copy from
 
 /****** ADC related vars ******************************************************
  *  A0 = {Reserverd for the analog buttons}
- *  A1 = vrl, vl: voltages in the load (sweeper) in raw adc unites / mv *10
- *  A2 = vrm, vm: voltages in the meter in raw adc unites / mv *10
+ *  A1 = adcrR, dB: dB in the receiver side in dB *100
+ *  A2 = adcrM, vm: voltages in the meter in raw adc unites / mv *10
  *
  ******************************************************************************/
 #define ADC_M   (A1)
-#define ADC_L   (A2)
+#define ADC_R   (A2)
 
 // raw vars in ADC units (0-1023)
-word vrl = 0;
-word vrm = 0;
+word adcrR = 0;   // Receptor
+word adcrM = 0;   // Meter
 
 // final values in mv * 10
-word vl = 0;
-word vm = 0;
+word mVdB = 0; // mV for dB
+int dB = 0;    // Receptor
+int vm = 0;    // Meter
 
 // ADC samples for oversampling, the real value is ADC_SAMPLES / ADC_DIVIDER
-#define ADC_SAMPLES     40  // WATCH OUT ! max = 63
+#define ADC_SAMPLES     20  // WATCH OUT ! max = 63
 #define ADC_DIVIDER     10
 
+// conversion to DB and dealing with the fact that the DB is NEGATIVE
+#define Base_dB     1105    // 110.5
+                            // the base for that dB calculation
+                            // as well as its the lowest value the dB can go
+                            // belo that,
 
 /***** meter mode vars and defines ******************************************/
 

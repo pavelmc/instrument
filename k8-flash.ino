@@ -64,27 +64,23 @@ unsigned long getFlashPos(word index) {
 
 // store it
 void flashWriteData(word index, unsigned long f) {
-    // where to write, base of the 12 bytes
-    unsigned long pos;
-    // the base address
-    pos = getFlashPos(index);
+    // where to write, base of the data
+    unsigned long pos = getFlashPos(index);
 
     // now we write
-    flash.writeLong(pos, f, false);
-    flash.writeWord(pos + 4, vl, false);
+    flash.writeLong(pos, f, false);         // 4 bytes
+    flash.writeShort(pos + 4, dB, false);   // 2 bytes signed
 }
 
 
 // retrieve it
 unsigned long flashReadData(word index) {
-    // where to write, base of the 12 bytes
-    unsigned long pos;
-    // the base address
-    pos = getFlashPos(index);
+    // where to write, base of the data
+    unsigned long pos = getFlashPos(index);
 
     // now we read
     unsigned long fout = flash.readLong(pos);
-    vl = flash.readWord(pos + 4);
+    dB = flash.readShort(pos + 4);
 
     // return it
     return fout;

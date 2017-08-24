@@ -230,7 +230,7 @@ void bMagicHold() {
     // SWEEP
     if (mode == MODE_SWEEP) {
         // show the dB bandwidth
-        showDB();
+        //~ showDB();
     }
 
     //~ // METER

@@ -131,7 +131,7 @@ void moveConfig(char dir) {
                 ppm += 10L * dir;
 
                 // apply the change
-                //~ Si.correction(ppm);
+                Si.correction(ppm);
                 setFreq(*mainFreq);
 
                 // show it

@@ -258,7 +258,7 @@ void drawMainVFObox() {
 
 
 // track min/max
-void trackMinMax(long val, unsigned long f) {
+void trackMinMax(int val, unsigned long f) {
     // minimum
     if (val <= minv) {
         // new minimum
@@ -275,23 +275,8 @@ void trackMinMax(long val, unsigned long f) {
 }
 
 
-// convert adc units to mVolts (mV * 10)
-// 1 V = 10000 aka /10000 for V
-word tomV(word value) {
-    // local vars
-    unsigned long tmp;
-
-    // now convert it to mv * 10
-    tmp = value * 50000L;
-    tmp /= ((ADC_SAMPLES / ADC_DIVIDER) * 1023);
-
-    // return it
-    return (word)tmp;
-}
-
-
 // convert mV * 10 to mW *10
-unsigned long mV2mW(word mv) {
+unsigned long tomW(int mv) {
     /********************************************
      * power is  P = V^2 / 50
      *
@@ -338,14 +323,14 @@ int mW2dBm(word mw) {
 
 
 // process the values to show in the min/max in the sweep
-void minmaxSweepValue(word value) {
+void minmaxSweepValue(int value) {
     // reset the print buffers
     cleanPrintbuffer();
 
     // load the value to the temp buffer and prepare the final buffer
     ltoa(value, t, DEC);
     prepValue4Print(strlen(t));
-    //strcat(f, " mV");
+    strcat(f, " dB");
 
     // ready to print in the f[] buffer
 }

@@ -22,7 +22,7 @@ void setup() {
 
     // set the analog as inputs
     pinMode(ADC_M, INPUT);
-    pinMode(ADC_L, INPUT);
+    pinMode(ADC_R, INPUT);
 
     // TFT settings
     tft.begin();
@@ -41,7 +41,7 @@ void setup() {
     Si.off();
 
     // now we have the Si5351 off, we take the base readings for the meter
-    vrm = takeSample(ADC_M);
+    adcrM = takeSample(ADC_M);
 
     // set & apply my calculated correction factor
     Si.correction(ppm);

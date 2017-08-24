@@ -17,22 +17,33 @@ void menu() {
     tft.setTextSize(2);
     tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
 
+    // update numbers
+    menuUpdate();
+
+    // print labels for the mode
     for (byte i = 1; i < MODE_COUNT; i++) {
-
-        // print the mode number, activated or not.
-        tft.setCursor(12, 26 + 26 * i);
-        // mark if selected
-        if (smode == i) tft.setTextColor(ILI9340_BLACK, ILI9340_YELLOW);
-
-        // print the number
-        tft.print(i);
-
         // label of the mode
         tft.setCursor(30, 26 + 26 * i);
 
         // print the mode label, always on the same color
         tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
         tft.print(modeLabels[i]);
+    }
+}
+
+
+// update menu position
+void menuUpdate() {
+    for (byte i = 1; i < MODE_COUNT; i++) {
+
+        // print the mode number, activated or not.
+        tft.setCursor(12, 26 + 26 * i);
+        // mark if selected
+        if (smode == i) tft.setTextColor(ILI9340_BLACK, ILI9340_YELLOW);
+        else            tft.setTextColor(ILI9340_CYAN, ILI9340_BLACK);
+
+        // print the number
+        tft.print(i);
     }
 }
 
@@ -100,5 +111,5 @@ void moveMenu(char dir) {
     smode = moveWithLimits(smode, dir, 1, MODE_COUNT - 1);
 
     // call it
-    menu();
+    menuUpdate();
 }

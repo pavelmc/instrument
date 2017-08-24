@@ -41,8 +41,9 @@ average_max = 11 # the number you want + 1
 sampleList = [50, 100, 200, 500, 1000, 2000, 4000, 8000] # samples per sweep
 
 # limits
+IF = 10702400
 min_start = 100000      # 100 kHz
-max_stop  = 196000000   # 220 MHz
+max_stop  = 224000000 - IF   # 220 MHz
 
 # Main vars
 runMode = 0     # 0 = stoppped, 1 = running
@@ -539,22 +540,12 @@ class ApplicationWindow(QMainWindow):
                 else:
                     line = 0
 
-                # line can't be zero
-                if line == 0:
-                    # a default lowest value
-                    line = 1.0
-
                 # add it + increment counter
                 val += line
                 avec += 1
 
             # average readings
-            line = val / float(self.average)
-
-            # this a reference to  mv Values in mV*10
-            # convert it to dB on the fly
-
-            dbm = 10.0 * math.log10(line / scale)
+            dbm = val / (self.average * 10.0)
 
             # update data
             if (self.refActive):

@@ -60,7 +60,7 @@ void serialComms() {
                 takeADCSamples();
 
                 // send raw values via serial
-                Serial.println(vrl);
+                Serial.println(dB);
             }
 
             // reset counter and blank string
