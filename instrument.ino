@@ -265,15 +265,15 @@ word mVdB = 0; // mV for dB
 int dB = 0;    // Receptor
 int vm = 0;    // Meter
 
-// ADC samples for oversampling, the real value is ADC_SAMPLES / ADC_DIVIDER
-#define ADC_SAMPLES     20  // WATCH OUT ! max = 63
-#define ADC_DIVIDER     10
+// ADC samples for oversampling
+// how many extra bits we want to get over the default 10 bits
+#define ADC_OS      3   // 13 bits
+word max_samples = (1 << (10 + ADC_OS)) - 1;
 
 // conversion to DB and dealing with the fact that the DB is NEGATIVE
 #define Base_dB     1105    // 110.5
                             // the base for that dB calculation
                             // as well as its the lowest value the dB can go
-                            // belo that,
 
 /***** meter mode vars and defines ******************************************/
 

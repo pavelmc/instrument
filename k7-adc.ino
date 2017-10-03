@@ -33,25 +33,29 @@ void meterRead() {
 
 // take samples of one ADC at a time, using average of ADC_SAMPLES
 word takeSample(byte adc) {
-    // temp var
-    word total = 0;
+    // take the adc samples
+    if (ADC_OS > 0) {
+        // temp var
+        unsigned long total = 0;
 
-    //cycle for ADC_SAMPLES
-    for (byte i = 0; i < ADC_SAMPLES; i++)
-        total += analogRead(adc);
+        // oversampling (sample * 4^n)
+        for (byte i = 0; i < pow(4, ADC_OS); i++)
+            total += analogRead(adc);
 
-    return (word)(total / ADC_DIVIDER);
+        total = total >> ADC_OS;
+
+        return (word)total;
+    } else {
+        return analogRead(adc);
+    }
+
 }
 
 
 // convert adc units to mV * 10
 word tomV(word value) {
-    // local vars
-    long tmp;
-
     // now convert it to mv * 10
-    tmp = value * 50000L;
-    tmp /= ((ADC_SAMPLES / ADC_DIVIDER) * 1023);
+    long tmp = (value * 50000L)/max_samples;
 
     // return it
     return (word)tmp;
@@ -79,10 +83,18 @@ int todB(word value) {
     // local vars
     long tmp = value;
 
-    /*** dB = ((V * 26.0)/1000) -110.5 ***/
+    /*** The formula:
+     *
+     * dB = ((V * 26.0)/1000) -110.5
+     *
+     * But we have a OpAmp following the RSSI output
+     * with a gain of 2, so we split the multiplier by half
+     * so not 26: 13
+     *
+     * ***/
 
     // tmp has the volt value
-    tmp *= 260;         // 26.0
+    tmp *= 130;         // 26.0
     tmp /= 10000;       // one more zero because the decimal above
     tmp -= Base_dB ;    // base dB
 
