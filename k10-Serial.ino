@@ -23,17 +23,25 @@
  ******************************************************************************/
 void serialComms() {
     // local vars
-    char ch;
     static char sb[11];     // serial buffer
     static byte sbc = 0;    // serial buffer counter
 
     // wait for chars to come on the serial line
-    while (Serial.available()) {
+    if (Serial.available() > 0) {
+        // temp vars
+        char ch;
+
         // read a char
         ch = (char)Serial.read();
 
         // add the char only if a number
         if ((ch >= '0') && (ch <= '9')) sb[sbc++] = ch;
+
+        // check if its a carrier on
+        if (ch == 'e') coff = 0;
+
+        // check if its a carrier off
+        if (ch == 'd') coff = 1;
 
         // fail safe if sbc goes high on a random stream
         if (sbc > 11) sbc = 0;
@@ -50,14 +58,11 @@ void serialComms() {
                 // put the sketch on that freq
                 setFreq(temp);
 
-                // allow a time to settle
-                delay(SCAN_PAUSE);
-            } else {
                 // delay to cope with spurs
                 delay(SCAN_PAUSE);
 
                 // Read ad values
-                takeADCSamples();
+                takeADCSamples(1);
 
                 // send raw values via serial
                 Serial.println(dB);

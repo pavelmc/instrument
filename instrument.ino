@@ -104,22 +104,23 @@ BMux abm;
 
 // vars
 
-// this is the IF at 10.7 Mhz
-#define VFO_OFFSET      10702400       // default value
+// this is the IF with 27.000 Mhz XTALs
+#define VFO_OFFSET      26994600       // default value
 
 /****** Frequency control related ******************************************/
 long vfoA = 100000000L;     // VFO A
 long vfoB =   7110000L;     // VFO B
 long *mainFreq;             // main freq, the one it's used now
 long *subFreq;              // the one in reserve
-char f[15];            // this is the frequency box like "145.170.670"
-int ppm = 3650;        // this is the correction value for the si5351
+char f[15];                 // this is the frequency box like "145.170.670"
+int ppm = 3650;             // this is the correction value for the si5351
 long  vfoOffset = VFO_OFFSET;
+bool coff = false;          // whether the carrier must be on/off in PC mode
 
 // define the mixing xtal and jumping
 // limits
 #define LIMI_LOW       100000   // 100 kHz
-#define LIMI_HIGH   224000000 - vfoOffset  // ~200 MHz
+#define LIMI_HIGH   227000000 - vfoOffset  // ~200 MHz
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -165,19 +166,11 @@ long scan_low, scan_high, sstep;
 
 // measure limits
 long minf, maxf;    // min/max feq values
-int minv, maxv;
+long minv, maxv;
 
 // the delay pause, in milli seconds after each freq set
 // to avoid the click on the Si5351 and allow the voltage to settle
-#define SCAN_PAUSE  5
-
-//~ // vard related to -3 & -6 db points
-//~ // levels for a scan, point of 0.5dB, 1dB, 3dB, 6dB & 9dB
-//~ int dB05l, dB1l, dB3l, dB6l, dB9l;
-
-//~ // variable for the db
-//~ long fdb3s, fdb3e, fdb6s, fdb6e;
-//~ long bw3db, bw6db;
+#define SCAN_PAUSE  3
 
 
 /****************** FLASH related vars ***********************************/
@@ -254,26 +247,30 @@ char empty[] = "     ";    // "empty" string to copy from
  *
  ******************************************************************************/
 #define ADC_M   (A1)
-#define ADC_R   (A2)
+#define ADC_R   (A3)
 
 // raw vars in ADC units (0-1023)
 word adcrR = 0;   // Receptor
 word adcrM = 0;   // Meter
 
 // final values in mv * 10
-word mVdB = 0; // mV for dB
-int dB = 0;    // Receptor
-int vm = 0;    // Meter
+word mVr = 0;   // mV read
+word vm = 0;    // Meter
+long dB = 0;    // dB in reference to the maximum of the scale
+                // in dB * 100; 1 = 0.01; 10 = 0.10, 100 = 1.00
+                // in PC mode it will default to * 100 instead of * 10
 
 // ADC samples for oversampling
-// how many extra bits we want to get over the default 10 bits
-#define ADC_OS      3   // 13 bits
-word max_samples = (1 << (10 + ADC_OS)) - 1;
+// how many EXTRA bits we want to get over the default 10 bits
+#define ADC_OS      3   // xx bits
+word max_samples = pow(2, (10 + ADC_OS)) - 1;
 
-// conversion to DB and dealing with the fact that the DB is NEGATIVE
-#define Base_dB     1105    // 110.5
-                            // the base for that dB calculation
-                            // as well as its the lowest value the dB can go
+// This is the base level, if we are dealing with mV it's 0
+// but if we handle it as dB it will be a real value
+#define Base_level     -1090  //
+
+// define the 5 volts
+#define V5V 49000    // 4.9 volts in the arduino
 
 /***** meter mode vars and defines ******************************************/
 

@@ -109,7 +109,7 @@ void moveSpanUpdate(char dir) {
  *
  *****************************************************************************/
 void makeScan() {
-    // half scan span, reused below as freq seeping
+    // half scan span, reused below as sweeping freq
     long hs = sweep_spans[sspan] / 2;
 
     // scan step
@@ -139,17 +139,31 @@ void makeScan() {
 
     // calculate the range for the display
     word span = abs(maxv - minv);
+    word rspan = span;
 
     // 15% increase either side
     word rangeEdges = (span * 15L) / 100;
 
+    //~ // DEBUG
+    //~ Serial.print("minv: ");
+    //~ Serial.println(minv);
+    //~ // DEBUG
+    //~ Serial.print("maxv: ");
+    //~ Serial.println(maxv);
+    //~ // DEBUG
+    //~ Serial.print("span: ");
+    //~ Serial.println(span);
+    //~ // DEBUG
+    //~ Serial.print("rangeEdges: ");
+    //~ Serial.println(rangeEdges);
+
     // calc min/max
-    int tftmin, tftmax;
+    long tftmin, tftmax;
 
     // checking lower limit for minval
-    if (minv < (rangeEdges - (int)Base_dB)) {
-        // it can be less than the base dB aka zero
-        tftmin = Base_dB;
+    if ((minv - rangeEdges) < Base_level) {
+        // it can be less than the base aka zero
+        tftmin = Base_level;
     } else {
         // ok its greater
         tftmin = minv - rangeEdges;
@@ -161,30 +175,41 @@ void makeScan() {
     // new span with +/-15%
     span = abs(tftmax - tftmin);
 
+    //~ // DEBUG
+    //~ Serial.print("tftmin: ");
+    //~ Serial.println(tftmin);
+    //~ // DEBUG
+    //~ Serial.print("tftmax: ");
+    //~ Serial.println(tftmax);
+    //~ // DEBUG
+    //~ Serial.print("span: ");
+    //~ Serial.println(span);
+
     // check for span low than the screen
     if (span < TFT_HEIGHT) {
         // calc center value
         int cv = tftmin + (span/2);
 
         // reset to center the graph on screen
-        tftmin = cv + TFTH_12;
-        tftmax = cv - TFTH_12;
+        tftmin = cv - TFTH_12;
+        tftmax = cv + TFTH_12;
     }
 
-    //~ // determine -6dB, -3dB & -1dB; 89.12
-    //~ dB05l = (word)(maxv * 8912L / 10000);        // -0.5dB aka max * 0.8912
-    //~ dB1l  = (word)(maxv * 794L  / 1000);         // -1dB   aka max * 0.794
-    //~ dB3l  = maxv / 2;                            // -3dB   aka max * 0.5
-    //~ dB6l  = maxv / 4;                            // -6dB   aka max * 0.25
-    //~ dB9l  = maxv / 8;                            // -9dB   aka max * 0.125
+    //~ // DEBUG
+    //~ Serial.println("Expanded to 240");
+
+    // DEBUG
+    Serial.print("tftmin: ");
+    Serial.println(tftmin);
+    // DEBUG
+    Serial.print("tftmax: ");
+    Serial.println(tftmax);
+    // DEBUG
+    Serial.print("span: ");
+    Serial.println(span);
 
     //  clean screen and draw graphic
-    drawbars(tftmin, tftmax);
-
-    #ifdef DEBUG
-        // print serial headers
-        Serial.println((char *)"freq;load");
-    #endif
+    drawbars(tftmin, tftmax, rspan);
 
     // the var that hold the masurement
     int measure;
@@ -194,7 +219,7 @@ void makeScan() {
 
     // draw and spit via serial if debug
     for (word i = 0; i < TFT_WIDTH; i++) {
-        // read the value from FLASH, put the dB on the environment
+        // read the value from FLASH, put the value on the environment
         // return frequency
         hs = flashReadData(i);
 
@@ -210,12 +235,12 @@ void makeScan() {
         // prepare for next cycle
         lx = measure;
 
-        //~ #ifdef DEBUG
-            //~ // "freq;load"
-            //~ Serial.print(hs);
-            //~ Serial.print(";");
-            //~ Serial.println(dB);
-        //~ #endif
+        //~ // "freq;load"
+        //~ Serial.print(hs);
+        //~ Serial.print(";");
+        //~ Serial.print(dB);
+        //~ Serial.print(";");
+        //~ Serial.println(lx);
     }
 
     // print min max
@@ -246,7 +271,7 @@ void makeScan() {
 
 
 // draw bars
-void drawbars(int tftmin, int tftmax) {
+void drawbars(long tftmin, long tftmax, word rspan) {
     // calc how many vertical lines
     byte bars = sweep_spans[sspan] % 3 ;
     if (bars == 0)
@@ -265,30 +290,37 @@ void drawbars(int tftmin, int tftmax) {
 
     // horizontal lines
     /************************************************************************
-     * We will draw lines for
-     * -0.5dB
-     * -1db
-     * -3db
-     * -6dB
-     * -9dB
+     * We will draw lines for each 10 dB exactly on the /10 dB between the
+     * limits of the tft lines
      ************************************************************************/
-    //~ int dB05, dB1, dB3, dB6, dB9;
-    //~ dB05 = map(dB05l, tftmin, tftmax, 0, TFT_HEIGHT);
-    //~ dB1  = map(dB1l, tftmin, tftmax, 0, TFT_HEIGHT);
-    //~ dB3  = map(dB3l, tftmin, tftmax, 0, TFT_HEIGHT);
-    //~ dB6  = map(dB6l, tftmin, tftmax, 0, TFT_HEIGHT);
-    //~ dB9  = map(dB9l, tftmin, tftmax, 0, TFT_HEIGHT);
 
-    // put dB labels, if possible
+    // colors for the horizontal lines
     tft.setTextColor(ILI9340_WHITE);
     tft.setTextSize(1);
 
-    //~ // print horizontal lines
-    //~ printdBlines(dB05, "-0.5dB");
-    //~ printdBlines(dB1, "-1dB");
-    //~ printdBlines(dB3, "-3dB");
-    //~ printdBlines(dB6, "-6dB");
-    //~ printdBlines(dB9, "-9dB");
+    // selecting the variable step as a function of the span
+    word step = 60; // 3dB
+    if (rspan > 100) { step = 100; }
+    if (rspan > 300) { step = 300; }
+
+    for (int i = tftmin; i < tftmax; i++) {
+        if ((abs(i) % step) == 0) {
+            //~ // DEBUG
+            //~ Serial.print("Value: ");
+            //~ Serial.println(i);
+
+            // set position
+            int pos = map(i, tftmin, tftmax, 0, TFT_HEIGHT);
+
+            //~ // DEBUG
+            //~ Serial.print("Pos: ");
+            //~ Serial.println(pos);
+
+            // reuse a similar function to load the text
+            minmaxSweepValue(i);
+            printdBlines(pos, f);
+        }
+    }
 
     // print labels, default size and color
     tft.setTextColor(ILI9340_YELLOW);
@@ -315,16 +347,59 @@ void drawbars(int tftmin, int tftmax) {
 }
 
 
-//~ // print db lines
-//~ // it has a ward mechanism: if it will be positioned beyond screen limits
-//~ // it will not be printed, nice
-//~ void printdBlines(int val, char *text) {
-    //~ if (val > 8 and val < (TFT_HEIGHT - 8)) {
-        //~ tft.drawLine(0, TFT_HEIGHT - val, TFT_WIDTH, TFT_HEIGHT - val, ILI9340_WHITE);
-        //~ tft.setCursor((TFT_WIDTH - 38), (TFT_HEIGHT - 8) - val);
-        //~ tft.print(text);
-    //~ }
-//~ }
+// print db lines
+// it has a ward mechanism: if it will be positioned beyond screen limits
+// it will not be printed, nice
+void printdBlines(int val, char *text) {
+    if (val > 24 and val < (TFT_HEIGHT - 24)) {
+        tft.drawLine(0, TFT_HEIGHT - val, TFT_WIDTH, TFT_HEIGHT - val, ILI9340_WHITE);
+        tft.setCursor((TFT_WIDTH - 66), (TFT_HEIGHT - 8) - val);
+        tft.print(text);
+    }
+}
+
+
+// initial scan into SPIFLASH, the pos is for the bar
+void makeScan2Flash(byte pos, bool write2flash) {
+    // increment the position, if instructed
+    if (write2flash == true) flashNext();
+
+    word count = 0;
+    unsigned long f;
+
+    // do the scan to flash
+    for (f = scan_low; f < scan_high; f += sstep) {
+        //set the frequency
+        setFreq(f);
+
+        // allow a time to settle
+        delay(SCAN_PAUSE);
+
+        // take samples
+        takeADCSamples(0);
+
+        // start point settings at first time
+        if (f == scan_low) {
+            // reset the low and high parameters
+            minf = maxf = scan_low;
+
+            // set min/max to this parameter
+            minv = maxv = dB;
+        }
+
+        //track min/max
+        trackMinMax(dB, f);
+
+        // save to flash only if needen
+        if (write2flash == true) flashWriteData(count, f);
+
+        // count increase
+        count += 1;
+
+        // we need to update the bar here, TODO
+        tft.fillRect(0, pos, count, 5, ILI9340_GREEN);
+    }
+}
 
 
 //~ // show the DB measurements
@@ -419,46 +494,3 @@ void drawbars(int tftmin, int tftmax) {
     //~ prepFreq4Print(fdb6e, true);
     //~ tft.print(f);
 //~ }
-
-
-// initial scan into SPIFLASH, the pos is for the bar
-void makeScan2Flash(byte pos, bool write2flash) {
-    // increment the position, if instructed
-    if (write2flash == true) flashNext();
-
-    word count = 0;
-    unsigned long hs;
-
-    // do the scan to flash
-    for (hs = scan_low; hs < scan_high; hs += sstep) {
-        //set the frequency
-        setFreq(hs);
-
-        // allow a time to settle
-        delay(SCAN_PAUSE);
-
-        // take samples and convert it to dB
-        takeADCSamples();
-
-        // start point settings at first time
-        if (hs == scan_low) {
-            // reset the low and hig parameters
-            minf = maxf = scan_low;
-
-            // set min/max to this parameter
-            minv = maxv = dB;
-        }
-
-        //track min/max
-        trackMinMax(dB, hs);
-
-        // save to flash only if needen
-        if (write2flash == true) flashWriteData(count, hs);
-
-        // count increase
-        count += 1;
-
-        // we need to update the bar here, TODO
-        tft.fillRect(0, pos, count, 5, ILI9340_GREEN);
-    }
-}

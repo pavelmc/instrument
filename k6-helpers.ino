@@ -85,13 +85,13 @@ void prepFreq4Print(long fr, boolean doHz) {
     // check size
     /*** by using if instead of switch/case we save a few bytes ***/
 
-    if (l == 2) { // "90"
+    if (l == 2) { // "         90"
         strncat(f, &empty[0], 5);   // "     "
         strncat(f, &empty[0], 4);   //       "    "
         strcat(f, t);               //            "90"
     }
 
-    if (l == 3) { // "900"
+    if (l == 3) { // "        900"
         strncat(f, &empty[0], 5);   // "     "
         strncat(f, &empty[0], 3);   //       "   "
         strcat(f, t);               //           "900"
@@ -105,21 +105,21 @@ void prepFreq4Print(long fr, boolean doHz) {
         strncat(f, &t[1], 3);       //            "000"
     }
 
-    if (l == 5) { // "90.000"
+    if (l == 5) { // "     90.000"
         strncat(f, &empty[0], 5);   // "     "
         strncat(f, &t[0], 2);       //       "90"
         strcat(f, ".");             //          "."
         strncat(f, &t[2], 3);       //            "000"
     }
 
-    if (l == 6) { // "455.000"
+    if (l == 6) { // "    455.000"
         strncat(f, &empty[0], 4);   // "    "
         strncat(f, &t[0], 3);       //      "455"
         strcat(f, ".");             //          "."
         strncat(f, &t[3], 3);       //            "000"
     }
 
-    if (l == 7) { // "1.840.000"
+    if (l == 7) { // "  1.840.000"
         strncat(f, &empty[0], 2);   // "  "
         strncat(f, &t[0], 1);       //    "1"
         strcat(f, ".");             //      "."
@@ -128,7 +128,7 @@ void prepFreq4Print(long fr, boolean doHz) {
         strncat(f, &t[4], 3);       //              "000"
     }
 
-    if (l == 8) { // "14.230.000"
+    if (l == 8) { // " 14.230.000"
         strncat(f, &empty[0], 1);   // " "
         strncat(f, &t[0], 2);       //   "14"
         strcat(f, ".");             //      "."
@@ -236,14 +236,15 @@ byte moveWithLimits(byte var, char dir, byte low, byte high) {
 
 // set freq to the Si5351
 void setFreq(unsigned long f) {
-    // set main RF
-    // but desctivate it if SA mode
-    if (mode == MODE_SA) {
-        // disabled
-        Si.disable(2);
+    // set main RF but deactivate it if SA mode or Pc under request
+    if (mode == MODE_SA or coff == 1) {
+        // disable if needed
+        if (Si.clkOn[2] == 1) Si.disable(2);
     } else {
         // set freq
-         Si.setFreq(2, f);
+        Si.setFreq(2, f);
+        // enable it if needed
+        if (Si.clkOn[2] == 0) Si.enable(2);
     }
 
     // set VFO freq to obtain a VFO_OFFSET
@@ -258,7 +259,7 @@ void drawMainVFObox() {
 
 
 // track min/max
-void trackMinMax(int val, unsigned long f) {
+void trackMinMax(long val, unsigned long f) {
     // minimum
     if (val <= minv) {
         // new minimum
@@ -275,8 +276,55 @@ void trackMinMax(int val, unsigned long f) {
 }
 
 
+// convert adc units to mV * 10
+word tomV(word val) {
+    // now convert it to mv * 10
+    long tmp;
+    tmp  = (val * V5V);
+    tmp /=  max_samples;
+
+    // return it
+    return (word)tmp;
+}
+
+
+// convert mV to dB * 10; 1 dB = 10 = 1.0
+/*****************************************************************************
+ * We are using a crude dB calculation here
+ *  > at 10 bits adc we must have a DR of 30.0 dB
+ *  > at 11 bits adc we must have a DR of 33.1 dB
+ *  > at 12 bits adc we must have a DR of 36.1 dB
+ *  > at 13 bits adc we must have a DR of 39.1 dB
+ *
+ * So we will use a 13 bits ADC correction
+ *
+ * dB is 10 * log (actual/max) and it will give a negative value
+ *
+ *****************************************************************************/
+long todB(word val, bool hres) {
+    float div = val;
+    float dB;
+
+    // failsafe for zero readings
+    if (val == 0) { div = 0.9999999; }
+
+    // get the real div factor
+    div /= V5V;
+
+    // calc the real dB * 10
+    dB = 100 * log(div);
+
+    // a step further for the resolution
+    if (hres == 1) {dB *= 10;}
+
+    // return it
+    return (long)dB;
+;
+}
+
+
 // convert mV * 10 to mW *10
-unsigned long tomW(int mv) {
+unsigned long tomW(long mv) {
     /********************************************
      * power is  P = V^2 / 50
      *
@@ -290,14 +338,14 @@ unsigned long tomW(int mv) {
     unsigned long p = mv;
     p = mv * p;
     // divide bt 50 ohms plus correction
-    p /= 500000;
+    p /= V5V;
     // now it has the power in mW * 10
     return p;
 }
 
 
 // convert mV *10 to dBm * 10
-int mW2dBm(word mw) {
+long todBm(long mv) {
     /*********************************************************************
      * dBm is 10 * log10(mw)
      *
@@ -309,7 +357,7 @@ int mW2dBm(word mw) {
      * we multiply it by 10 and convert it to int
      ********************************************************************/
     // calc it
-    double dbm = log10(mw) * 10;
+    float dbm = log10(tomW(vm)) * 10;
 
     // it has a 10 shift, move
     dbm -= 10.0;
@@ -318,12 +366,12 @@ int mW2dBm(word mw) {
     dbm *= 10.0;
 
     // return it
-    return (int)dbm;
+    return (long)dbm;
 }
 
 
 // process the values to show in the min/max in the sweep
-void minmaxSweepValue(int value) {
+void minmaxSweepValue(long value) {
     // reset the print buffers
     cleanPrintbuffer();
 

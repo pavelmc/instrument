@@ -34,10 +34,6 @@ progversion = "0.1"
 SERIALPORT_SPEED = 115200
 SERIALPORT_TIMEOUT = 0.07
 
-# adc oversampling factor
-ADC_OVERSAMPLING = 4
-average_max = 11 # the number you want + 1
-
 sampleList = [50, 100, 200, 500, 1000, 2000, 4000, 8000] # samples per sweep
 
 # limits
@@ -293,9 +289,12 @@ class ApplicationWindow(QMainWindow):
         for sample in sampleList:
             self.cbsamples.addItem(str(sample))
 
+        # set default index to 500 samples
+        self.cbsamples.setCurrentIndex(3)
+
         # average and populate it
         self.cbaverage = QComboBox()
-        for ave in range(1, average_max, 1):
+        for ave in range(1, 11, 1):
             self.cbaverage.addItem(str(ave))
 
         # text lines
@@ -333,6 +332,10 @@ class ApplicationWindow(QMainWindow):
         # create a "Continuous scan" checkbox
         self.cs = QCheckBox("Continuous Scan")
 
+        # create a "Carrier On" checkbox
+        self.co = QCheckBox("Carrier On")
+        self.co.setChecked(True)
+
         # create progress bar
         self.pbar = QProgressBar()
         self.pbar.isTextVisible = True
@@ -341,10 +344,11 @@ class ApplicationWindow(QMainWindow):
         self.pbar.setValue(0)
 
         # Adding it
-        buttons.addWidget(self.cs)
         buttons.addWidget(bStart)
         buttons.addWidget(bStop)
         buttons.addWidget(self.bRef)
+        buttons.addWidget(self.co)
+        buttons.addWidget(self.cs)
 
         # stretcher
         buttons.addStretch()
@@ -357,6 +361,7 @@ class ApplicationWindow(QMainWindow):
         bStop.clicked.connect(self.scanStop)
         self.bRef.clicked.connect(self.set_ref)
         self.cs.stateChanged.connect(self.scan_type_check)
+        self.co.stateChanged.connect(self.carrier_on_check)
 
         # triger some actions on change
         self.cbsamples.activated.connect(self.break_ref)
@@ -383,16 +388,13 @@ class ApplicationWindow(QMainWindow):
         self.refActive = False
         self.scanCompleted = False
         self.scanStoped = False
+        self.carrier = True
 
         # update some vars
         self.update_scan_params()
 
         # serial opened flag
         self.workingSerial = False
-
-        # scale to apply to 1023, the mas value of the ADC
-        # this is read from the Hardware up on init of the serial com
-        self.adcScale = ADC_OVERSAMPLING
 
 
     # clean the serial buffer
@@ -415,6 +417,16 @@ class ApplicationWindow(QMainWindow):
         else:
             # not checked
             self.continuous = False
+
+
+    # check if Carrier must be on during scan
+    def carrier_on_check(self):
+        if (self.co.isChecked()):
+            # it's checked
+            self.carrier = True
+        else:
+            # not checked
+            self.carrier = False
 
 
     # set the value in the start freq lineEdit
@@ -497,6 +509,7 @@ class ApplicationWindow(QMainWindow):
     def scanStop(self):
         self.runMode = 0
         self.scanStoped = True
+        self.cs.setChecked(False)
 
 
     # make a sweep, no matter if simple shot or continuous
@@ -504,10 +517,32 @@ class ApplicationWindow(QMainWindow):
         index = 0
         f = self.start
         dbm = 0.0
-        scale = 1023.0 * self.adcScale
 
         # clean serial buffer
         self.serial_clean()
+
+        # default return char
+        ret = str("\n").encode()
+
+        # send the carrier Enable or Disable command
+        if (self.carrier == True):
+            setf = str("e").encode()
+            print("Send Carrier Enable")
+        else:
+            setf = str("d").encode()
+            print("Send Carrier Disable")
+
+        # send the command
+        self.serial.write(setf + ret)
+        # time to process
+        time.sleep(0.01)
+        # force a freq send and a line read to apply and clean the buffer
+        setf = str(f).encode()
+        self.serial.write(setf + ret)
+        # time to process
+        time.sleep(0.01)
+        # now read a line to clean de buffer
+        line = self.serial.readline()
 
         while(index < len(self.graph.x)):
             #check if run mode has changed to break the loop
@@ -517,16 +552,14 @@ class ApplicationWindow(QMainWindow):
 
             # set freq on device
             # python 3 handle all strings as unicode
-            ret = str("\n").encode()
             setf = str(f).encode()
-            self.serial.write(setf + ret)
 
             # averaging
             avec = 0
             val = 0
             while (avec < self.average):
                 # request the data
-                self.serial.write(ret)
+                self.serial.write(setf + ret)
 
                 # get it
                 line = self.serial.readline()
@@ -536,16 +569,19 @@ class ApplicationWindow(QMainWindow):
 
                 # conver to integer
                 if len(line) > 0:
-                    line = float(line)
+                    line = float(line) / 100.0
                 else:
-                    line = 0
+                    line = 0.0
+
+                # DEBUG
+                #~ print ("Result f: %i: %f" % (f, line))
 
                 # add it + increment counter
                 val += line
                 avec += 1
 
             # average readings
-            dbm = val / (self.average * 10.0)
+            dbm = val / self.average
 
             # update data
             if (self.refActive):

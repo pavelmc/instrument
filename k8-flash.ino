@@ -70,6 +70,7 @@ void flashWriteData(word index, unsigned long f) {
     // now we write
     flash.writeLong(pos, f, false);         // 4 bytes
     flash.writeShort(pos + 4, dB, false);   // 2 bytes signed
+    //~ flash.writeWord(pos + 4, mVr, false);   // 2 bytes unsigned
 }
 
 
@@ -80,7 +81,8 @@ unsigned long flashReadData(word index) {
 
     // now we read
     unsigned long fout = flash.readLong(pos);
-    dB = flash.readShort(pos + 4);
+    dB = flash.readShort(pos + 4);  // 2 bytes signed
+    //~ mVr = flash.readWord(pos + 4);  // 2 bytes unsigned
 
     // return it
     return fout;

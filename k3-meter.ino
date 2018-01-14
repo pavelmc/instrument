@@ -44,7 +44,7 @@ void showMeterMode() {
 
 // print level in mV at load
 void printLevelmV() {
-    // the value is expected in vl
+    // the value is expected in vm as milli Volts
 
     // clan print buffers
     cleanPrintbuffer();
@@ -76,60 +76,60 @@ void printLevelmV() {
 // print level in mW at load
 void printLevelmW() {
     // calc
-    //~ word mW = mV2mW(vm);
+    word mW = tomW(vm);
 
-    //~ // reset the print buffers
-    //~ cleanPrintbuffer();
+    // reset the print buffers
+    cleanPrintbuffer();
 
-    //~ // load the value to the temp buffer
-    //~ ltoa(mW, t, DEC);
+    // load the value to the temp buffer
+    ltoa(mW, t, DEC);
 
-    //~ // prep the print buffer
-    //~ prepValue4Print(strlen(t));
+    // prep the print buffer
+    prepValue4Print(strlen(t));
 
-    //~ // add the unit, as we will measure tops 0.5W, we will
-    //~ // use just mW
-    //~ strcat(f, " mW");
+    // add the unit, as we will measure tops 0.5W, we will
+    // use just mW
+    strcat(f, " mW");
 
-    //~ // 2 empty chars at the end
-    //~ strncat(f, &empty[0], 2);
+    // 2 empty chars at the end
+    strncat(f, &empty[0], 2);
 
-    //~ // set and prepare
-    //~ tft.setCursor(20, 100);
-    //~ tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
-    //~ tft.setTextSize(4);
+    // set and prepare
+    tft.setCursor(20, 100);
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
+    tft.setTextSize(4);
 
-    //~ // print it
-    //~ tft.print(f);
+    // print it
+    tft.print(f);
 }
 
 
 // print level in dBm at load.
 // WATCH OUT! it has limited resolution by the way it's calculated
 void printLeveldBm() {
-    //~ // calc
-    //~ int dBm = mW2dBm(mV2mW(vm));
+    // calc
+    long dBm = todBm(tomW(vm));
 
-    //~ // reset the print buffers
-    //~ cleanPrintbuffer();
+    // reset the print buffers
+    cleanPrintbuffer();
 
-    //~ // load the value to the temp buffer
-    //~ itoa(dBm, t, DEC);
+    // load the value to the temp buffer
+    itoa(dBm, t, DEC);
 
-    //~ // prep the print buffer
-    //~ prepValue4Print(strlen(t));
+    // prep the print buffer
+    prepValue4Print(strlen(t));
 
-    //~ // add the unit, as we will measure tops 0.5W, we will
-    //~ // use just mW
-    //~ strcat(f, " dBm");
-    //~ // 2 empty chars at the end
-    //~ strncat(f, &empty[0], 2);
+    // add the unit, as we will measure tops 0.5W, we will
+    // use just mW
+    strcat(f, " dBm");
+    // 2 empty chars at the end
+    strncat(f, &empty[0], 2);
 
-    //~ // set and prepare
-    //~ tft.setCursor(20, 140);
-    //~ tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
-    //~ tft.setTextSize(4);
+    // set and prepare
+    tft.setCursor(20, 140);
+    tft.setTextColor(ILI9340_YELLOW, ILI9340_BLACK);
+    tft.setTextSize(4);
 
-    //~ // print it
-    //~ tft.print(f);
+    // print it
+    tft.print(f);
 }

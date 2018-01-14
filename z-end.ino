@@ -46,12 +46,12 @@ void setup() {
     // set & apply my calculated correction factor
     Si.correction(ppm);
 
-    // set power (also enables the output in the process)
-    Si.setPower(0, 1);      // mixer
-    Si.setPower(2, 0);      // RF
-
     // pre-load the output freq
     setFreq(vfoA);
+
+    // set power (also enables the output in the process)
+    Si.setPower(0, 2);      // mixer {TWO}
+    Si.setPower(2, 0);      // RF {ZERO}
 
     // draw the interface
     changeMode();
