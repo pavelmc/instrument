@@ -1,7 +1,7 @@
 ###########################################################################
 # Multi-instrumento
 #
-# Author: M.Sc. Pavel Milanes Costa
+# Author: Pavel Milanes Costa
 # Email: pavelmc@gmail.com
 #
 ###########################################################################
@@ -37,9 +37,8 @@ SERIALPORT_TIMEOUT = 0.07
 sampleList = [50, 100, 200, 500, 1000, 2000, 4000, 8000] # samples per sweep
 
 # limits
-IF = 10702400
 min_start = 100000      # 100 kHz
-max_stop  = 224000000 - IF   # 220 MHz
+max_stop  = 200100000   # 220 MHz
 
 # Main vars
 runMode = 0     # 0 = stoppped, 1 = running
@@ -229,7 +228,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
     # to set the real y value, not the position
     def coord_format(self, x, y):
         # ident index to know y value
-        return "%.3f MHz (%.3f dB)" % (x, y)
+        return "%.6f MHz (%.3f dB)" % (x, y)
 
 
 # main app
@@ -243,8 +242,13 @@ class ApplicationWindow(QMainWindow):
         self.setWindowTitle("application main window")
 
         self.file_menu = QMenu('&File', self)
+        self.file_menu.addAction('&Open', self.fileOpen,
+                                 Qt.CTRL + Qt.Key_O)
+        self.file_menu.addAction('&Save', self.fileSave,
+                                 Qt.CTRL + Qt.Key_S)
         self.file_menu.addAction('&Quit', self.fileQuit,
                                  Qt.CTRL + Qt.Key_Q)
+
         self.menuBar().addMenu(self.file_menu)
 
         self.help_menu = QMenu('&Help', self)
@@ -430,11 +434,11 @@ class ApplicationWindow(QMainWindow):
 
 
     # set the value in the start freq lineEdit
-    def set_start_line(self, val):
+    def set_start_line(self, val = 0):
         # val is an integer in Hz
 
         # limit checks
-        if (val < min_start or val > max_stop):
+        if (val == 0 or (val < min_start or val > max_stop)):
             val = min_start
 
         # Scale to MHz and assigns
@@ -443,11 +447,11 @@ class ApplicationWindow(QMainWindow):
 
 
     # set the value in the stop freq lineEdit
-    def set_stop_line(self, val):
+    def set_stop_line(self, val = 0):
         # val is an integer in Hz
 
         # limit checks
-        if (val < min_start or val > max_stop):
+        if (val == 0 or (val < min_start or val > max_stop)):
             val = max_stop
 
         # Scale to MHz and assigns
@@ -512,7 +516,7 @@ class ApplicationWindow(QMainWindow):
         self.cs.setChecked(False)
 
 
-    # make a sweep, no matter if simple shot or continuous
+    # make a sweep, no matter if single shot or continuous
     def sweep(self, progress_callback):
         index = 0
         f = self.start
@@ -649,6 +653,9 @@ class ApplicationWindow(QMainWindow):
     def scanInit(self):
         # check if serial is open
         if (self.workingSerial == False):
+            # buffer to store parameters from the arduino
+            rxbuff= ""
+
             try:
                 # must open serial port
                 self.serial = serial.Serial(
@@ -667,12 +674,32 @@ class ApplicationWindow(QMainWindow):
                     # process events
                     qApp.processEvents()
 
+                # fmin & fmax ~20 chars on the buffer
+                rxbuff = self.serial.read(22)
+                # parse and set
+                self.set_limits(rxbuff)
+
+                # Send the init commands to the arduino
+                ret = str("\n").encode()
+                init = str("S").encode()
+                # init dance
+                self.serial.write(ret)
+                self.serial.write(init)
+                self.serial.write(ret)
+
+                # responsive wait: 1 seconds
+                for a in range(100):
+                    # scaled wait
+                    time.sleep(0.01)
+                    # process events
+                    qApp.processEvents()
 
                 # now we are talking
                 self.workingSerial = True
 
             except Exception:
                 self.set_status_msg("Error! Serial port can't be opened")
+                raise
                 return
 
         # run the thread, but only one
@@ -694,6 +721,34 @@ class ApplicationWindow(QMainWindow):
             self.start_thread()
         else:
             self.set_status_msg("A worker is busy, please wait.")
+
+
+    # set the min and max f values fro the string that the arduino gives
+    def set_limits(self, rx):
+        # buffer is something like this
+        # b'-L100000-H198000000-'
+        rxbuff = str(rx)
+
+        # extract the info
+        for e in rxbuff.split("-"):
+            # lower limit
+            if len(e) > 5 and e[0] == "L":
+                min_start = int(e[1:])
+
+            # higher limit
+            if len(e) > 5 and e[0] == "H":
+                max_stop = int(e[1:])
+
+        # print to know
+        print("Freq limits reported by arduino is:")
+        print("Start: %f MHz, Stop: %f MHz" %
+            (float(min_start) / 1000000,
+             float(max_stop) / 1000000))
+
+        # update internal and UI
+        self.set_start_line(min_start)
+        self.set_stop_line(max_stop)
+        self.get_start_stop()
 
 
     # check if must stop the scan or keep it running
@@ -758,10 +813,17 @@ class ApplicationWindow(QMainWindow):
                 self.set_status_msg("Not Possible, make a complete scan as reference")
 
 
-    # qtui the gui
+    # quit the gui
     def fileQuit(self):
         self.close()
 
+    # save the data of this scan
+    def fileSave(self):
+        print("save file")
+
+    # save the data of this scan
+    def fileOpen(self):
+        print("Open file")
 
     # close event
     def closeEvent(self, ce):
