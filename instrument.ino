@@ -1,14 +1,14 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
 
 /********** DEBUG MODE *************************/
 // uncomment this to get a few hits via serial
-//#define DEBUG true
+//~ #define DEBUG true
 
 
 #include "SPI.h"
@@ -81,10 +81,11 @@ SPIFlash flash(7);          // this is the PIN for the CHIP SELECT
 Rotary encoder = Rotary(ENC_A, ENC_B);
 
 // the debounce instances
-#define debounceInterval  10    // in milliseconds
+#define debounceInterval  30    // in milliseconds
 Bounce dbBtnPush = Bounce();
-unsigned long btnDownTime = 0;
+//~ unsigned long btnDownTime = 0;
 
+//#define SI_OVERCLOCK 950000000
 // lib instantiation as "Si"
 #include "si5351mcu.h"
 Si5351mcu Si;
@@ -112,15 +113,14 @@ long vfoA = 100000000L;     // VFO A
 long vfoB =   7110000L;     // VFO B
 long *mainFreq;             // main freq, the one it's used now
 long *subFreq;              // the one in reserve
-char f[15];                 // this is the frequency box like "145.170.670"
 int ppm = 3650;             // this is the correction value for the si5351
 long  vfoOffset = VFO_OFFSET;
 bool coff = false;          // whether the carrier must be on/off in PC mode
 
 // define the mixing xtal and jumping
 // limits
-#define LIMI_LOW       100000   // 100 kHz
-#define LIMI_HIGH   227000000 - vfoOffset  // ~200 MHz
+#define LIMI_LOW       100000  // 100 kHz
+#define LIMI_HIGH   225000000 - VFO_OFFSET //
 
 
 /****** SWEEP related defines and vars **************************************/
@@ -142,6 +142,7 @@ const unsigned long sweep_spans[] = {
     300000000       // 300MHz
 
 };
+
 const char *sweep_spans_labels[] = {
     "  320Hz",
     "1.00kHz",
@@ -170,7 +171,7 @@ long minv, maxv;
 
 // the delay pause, in milli seconds after each freq set
 // to avoid the click on the Si5351 and allow the voltage to settle
-#define SCAN_PAUSE  3
+#define SCAN_PAUSE  1
 
 
 /****************** FLASH related vars ***********************************/
@@ -236,8 +237,9 @@ boolean confSelected = false;
 
 
 /****** LCD print and formatting related ************************************/
+char f[15];                 // this is the frequency box like "145.170.670"
 char t[15];                 // this is a temp buffer
-char empty[] = "     ";    // "empty" string to copy from
+char empty[] = "     ";     // "empty" string to copy spaces from
 
 
 /****** ADC related vars ******************************************************
@@ -262,7 +264,7 @@ long dB = 0;    // dB in reference to the maximum of the scale
 
 // ADC samples for oversampling
 // how many EXTRA bits we want to get over the default 10 bits
-#define ADC_OS      3   // xx bits
+#define ADC_OS      3   // max bits (13)
 word max_samples = pow(2, (10 + ADC_OS)) - 1;
 
 // This is the base level, if we are dealing with mV it's 0
@@ -279,9 +281,10 @@ unsigned long nextMeasure = millis() + MEASURE_INTERVAL;
 
 
 /********************* LC vars **********************************************/
-// fell free to add your values here if you need more, please increment the
+// feel free to add your values here if you need more, please increment the
 // var below if you do so
-const byte kcaps[18] = {
+const byte kcaps[19] = {
+     3,         //  3p  30p 300p
      5,         //  5p  50p 500p
      8,         //  8p  80p 800p
     10,         // 10p 100p 1n0
@@ -302,7 +305,7 @@ const byte kcaps[18] = {
     91,         // 91p 910p 9n2
 };
 
-#define CAP_MAX 17
+#define CAP_MAX 18
 
 // cap index
 byte cindex = 0;
