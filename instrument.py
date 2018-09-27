@@ -819,11 +819,39 @@ class ApplicationWindow(QMainWindow):
 
     # save the data of this scan
     def fileSave(self):
-        print("save file")
+        fname = ""
+        formats = ["*.isf"]
+        fname = QFileDialog.getSaveFileName(self,
+            "Open saved scan", fname, "Scan data files (%s)" % " ".join(formats))
+
+        # fname is a tuple, multiple files are not allowed
+        # selecting just first
+        fname = str(fname[0])
+
+        if fname:
+            if "." not in fname:
+                fname += ".isf"
+
+            print(fname)
+            #~ self.Save(fname)
 
     # save the data of this scan
     def fileOpen(self):
-        print("Open file")
+        fname = ""
+        formats = ["*.isf"]
+        fname = QFileDialog.getOpenFileName(self,
+            "Save scan data", fname, "Scan data files (%s)" % " ".join(formats))
+
+        # fname is a tuple, multiple files are not allowed
+        # selecting just first
+        fname = str(fname[0])
+
+        if fname:
+            if "." not in fname:
+                fname += ".isf"
+
+            print(fname)
+            #~ self.Load(fname)
 
     # close event
     def closeEvent(self, ce):
@@ -844,9 +872,13 @@ pavelmc@gmail.com
 """)
 
 
-qApp = QApplication(sys.argv)
+app = QApplication(sys.argv)
+app.setOrganizationName("CO7WT Soft")
+app.setOrganizationDomain("co7wt.blogger.com")
+app.setApplicationName("Intrument PC interface")
+#~ app.setWindowIcon(QIcon(":/icon.png"))
 
 aw = ApplicationWindow()
-aw.setWindowTitle("%s" % progname)
+aw.setWindowTitle("%s" % "Intrument PC interface")
 aw.show()
-sys.exit(qApp.exec_())
+sys.exit(app.exec_())
