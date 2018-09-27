@@ -1,14 +1,14 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
 
 // menu functions
 void menu() {
-    //fail safe
+    // fail safe
     if (smode == 0) smode = 1;
     // draw the main box
     tft.drawRect(0, 22, TFT_WIDTH, 218, ILI9340_WHITE);

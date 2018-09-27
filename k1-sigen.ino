@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 

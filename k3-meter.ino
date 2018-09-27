@@ -1,12 +1,12 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
 
-// make a read every 100 mse cand average it
+// make a read every 100 msec and average it
 void powerMeasureAndShow() {
     // check if we need to measure
     if (millis() > nextMeasure) {

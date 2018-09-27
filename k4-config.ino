@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -142,10 +142,10 @@ void moveConfig(char dir) {
                 // mod the vfo0ffset
                 vfoOffset += getStep() * dir;
 
-                //~ #ifdef DEBUG
-                    //~ // serial debug
-                    //~ Serial.println(vfoOffset);
-                //~ #endif
+                // DEBUG
+                #ifdef DEBUG
+                    Serial.println(vfoOffset);
+                #endif
 
                 // apply the change
                 setFreq(*mainFreq);

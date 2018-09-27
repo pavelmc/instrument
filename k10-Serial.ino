@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -43,6 +43,12 @@ void serialComms() {
         // check if its a carrier off
         if (ch == 'd') coff = 1;
 
+        // check if its magic to go to serial mode
+        if (ch == 'S') {
+            mode = MODE_PC;
+            changeMode();
+        }
+
         // fail safe if sbc goes high on a random stream
         if (sbc > 11) sbc = 0;
 
@@ -54,7 +60,7 @@ void serialComms() {
             // extract the value
             unsigned long temp = atol(sb);
 
-            if (temp > LIMI_LOW & temp < LIMI_HIGH) {
+            if ((temp > LIMI_LOW) & (temp < LIMI_HIGH)) {
                 // put the sketch on that freq
                 setFreq(temp);
 

@@ -15,30 +15,33 @@ void checkButton() {
     if (dbBtnPush.update() == 1) {
         // button changed
 
-        // btn down
-        if (dbBtnPush.fell()) {
-            // start counting
-            btnDownTime = millis();
-        }
+        //~ // btn down
+        //~ if (dbBtnPush.fell()) {
+            //~ // start counting
+            //~ btnDownTime = millis();
+        //~ }
 
         // bton up
         if (dbBtnPush.rose()) {
-            long t = millis() - btnDownTime;
-
-            // check if hold
-            if (t > 1000 and t < 3000) {
-                // call action for buttons HOLD
-                checkHoldButton();
-            }
-
-            // check on click
-            if (t < 500 and t > 100) {
-                checkPushButton();
-            }
-
-            // reset timer
-            btnDownTime = millis();
+            checkPushButton();
         }
+
+            //~ long t = millis() - btnDownTime;
+
+            //~ // check if hold
+            //~ if (t > 1000 and t < 3000) {
+                //~ // call action for buttons HOLD
+                //~ checkHoldButton();
+            //~ }
+
+            //~ // check on click
+            //~ if (t < 500 and t > 100) {
+                //~ checkPushButton();
+            //~ }
+
+            //~ // reset timer
+
+        //~ }
     }
 }
 
@@ -104,7 +107,7 @@ void checkPushButton() {
 
 
 // check hold button
-void checkHoldButton() {
+//~ void checkHoldButton() {
     // do what you need to do in any case
 
     //~ // MENU
@@ -131,7 +134,7 @@ void checkHoldButton() {
     //~ if (mode == MODE_CONFIG) {
         //~ // NOOP
     //~ }
-}
+//~ }
 
 
 // MENU button click
@@ -228,10 +231,10 @@ void bMagicHold() {
     //~ }
 
     // SWEEP
-    if (mode == MODE_SWEEP) {
-        // show the dB bandwidth
+    //~ if (mode == MODE_SWEEP) {
+        //~ // show the dB bandwidth
         //~ showDB();
-    }
+    //~ }
 
     //~ // METER
     //~ if (mode == MODE_METER) {

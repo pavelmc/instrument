@@ -1,28 +1,25 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
 /*************************************************************************
- * SPI flash are not the same as an EEPROM, data must be write /read in
- * a way that data doesn't write over a data page we must use a trick
+ * A SPI flash is not the same as an EEPROM, data must be write /read in
+ * a way that the data doesn't write beyond a data page or troubles will
+ * came, then we must use a trick to not do that.
  *
- * The mem is structured in data pages of 256 bytes long usually,
- * we use a W25Q32 that has a length of 16384 pages of 256 bytes
+ * The flash mem is structured in data pages of 256 bytes long (usually)
+ * we use a W25Q32 that has a length of 16384 pages of 256 bytes: 4 MBytes
  *
  * You can use any SPI Flash supported or compatible with the SPIFlash lib
  * as this mechanism will compute the required values and will keep up
- * no matter what size of the flash its.
+ * no matter what size of the flash it's if they user a 256 bytes page.
  *
  * SPI flash are finite on writes and are not meant to be used as RAM
  * as in here, so I made a trick, I write each scan data in a new slice
- * of the mem, in my case with a 32 Mbit flash its about 240 slices (scans)
- * before we start to overwrite it.
- *
- * Datasheets states about 100k for sure writes, with this trick we have
- * about 24 M writes before the SPI broke, that's enough for me...
+ * of the mem, so avoiding wear out of the SPI, so far so good.
  ************************************************************************/
 
 

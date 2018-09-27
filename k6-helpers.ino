@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -162,14 +162,14 @@ void prepFreq4Print(long fr, boolean doHz) {
 void prepValue4Print(byte l) {
     switch (l) {
         case 7:
-            // "965.536" u
+            // "965.536" u (LSD is removed)
             strncat(f, &t[0], 3);
             strcat(f, ".");
             strncat(f, &t[3], 3);
             break;
 
         case 6:
-            // "65.536" u
+            // "65.536" u (LSD is removed)
             strncat(f, &t[0], 2);
             strcat(f, ".");
             strncat(f, &t[2], 3);
@@ -289,19 +289,19 @@ word tomV(word val) {
 
 
 // convert mV to dB * 10; 1 dB = 10 = 1.0
-/*****************************************************************************
- * We are using a crude dB calculation here
- *  > at 10 bits adc we must have a DR of 30.0 dB
- *  > at 11 bits adc we must have a DR of 33.1 dB
- *  > at 12 bits adc we must have a DR of 36.1 dB
- *  > at 13 bits adc we must have a DR of 39.1 dB
- *
- * So we will use a 13 bits ADC correction
- *
- * dB is 10 * log (actual/max) and it will give a negative value
- *
- *****************************************************************************/
 long todB(word val, bool hres) {
+    /***************************************************************************
+    * We are using a crude dB calculation here
+    *  > at 10 bits adc we must have a DR of 30.0 dB
+    *  > at 11 bits adc we must have a DR of 33.1 dB
+    *  > at 12 bits adc we must have a DR of 36.1 dB
+    *  > at 13 bits adc we must have a DR of 39.1 dB
+    *
+    * So we will use a 13 bits ADC correction
+    *
+    * dB is 10 * log (actual/max) and it will give a negative value
+    *
+    ***************************************************************************/
     float div = val;
     float dB;
 
@@ -349,7 +349,7 @@ long todBm(long mv) {
     /*********************************************************************
      * dBm is 10 * log10(mw)
      *
-     * but we areworking in mW * 10, so the formula remains as is
+     * but we are working in mW * 10, so the formula remains as is
      *
      * just you need to substract 10 to the result
      *
@@ -357,7 +357,7 @@ long todBm(long mv) {
      * we multiply it by 10 and convert it to int
      ********************************************************************/
     // calc it
-    float dbm = log10(tomW(vm)) * 10;
+    float dbm = log10(tomW(mv)) * 10;
 
     // it has a 10 shift, move
     dbm -= 10.0;

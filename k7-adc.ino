@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -20,16 +20,25 @@ void takeADCSamples(bool hres) {
     }
 
 
-    //~ // DEBUG
-    //~ Serial.print("dB: ");
-    //~ Serial.println(dB);
+    // DEBUG
+    #ifdef DEBUG
+        Serial.print("dB: ");
+        Serial.println(dB);
+    #endif
 }
 
 
 // measure at the meter
 void meterRead() {
+    // temp var
+    long tmp = 0;
+    byte count = 5;
+
     // take sample
-    vm = takeSample(ADC_M);
+    for (byte i = 0; i < count; i++) {
+        tmp += takeSample(ADC_M);
+    }
+    vm = (word)(tmp / count);
 
     // zero or mv...
     if (vm > adcrM) {

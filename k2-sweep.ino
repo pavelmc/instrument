@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -144,18 +144,20 @@ void makeScan() {
     // 15% increase either side
     word rangeEdges = (span * 15L) / 100;
 
-    //~ // DEBUG
-    //~ Serial.print("minv: ");
-    //~ Serial.println(minv);
-    //~ // DEBUG
-    //~ Serial.print("maxv: ");
-    //~ Serial.println(maxv);
-    //~ // DEBUG
-    //~ Serial.print("span: ");
-    //~ Serial.println(span);
-    //~ // DEBUG
-    //~ Serial.print("rangeEdges: ");
-    //~ Serial.println(rangeEdges);
+    // DEBUG
+    #ifdef DEBUG
+        Serial.print("minv: ");
+        Serial.println(minv);
+        // DEBUG
+        Serial.print("maxv: ");
+        Serial.println(maxv);
+        // DEBUG
+        Serial.print("span: ");
+        Serial.println(span);
+        // DEBUG
+        Serial.print("rangeEdges: ");
+        Serial.println(rangeEdges);
+    #endif
 
     // calc min/max
     long tftmin, tftmax;
@@ -175,15 +177,17 @@ void makeScan() {
     // new span with +/-15%
     span = abs(tftmax - tftmin);
 
-    //~ // DEBUG
-    //~ Serial.print("tftmin: ");
-    //~ Serial.println(tftmin);
-    //~ // DEBUG
-    //~ Serial.print("tftmax: ");
-    //~ Serial.println(tftmax);
-    //~ // DEBUG
-    //~ Serial.print("span: ");
-    //~ Serial.println(span);
+    // DEBUG
+    #ifdef DEBUG
+        Serial.print("tftmin: ");
+        Serial.println(tftmin);
+        // DEBUG
+        Serial.print("tftmax: ");
+        Serial.println(tftmax);
+        // DEBUG
+        Serial.print("span: ");
+        Serial.println(span);
+    #endif
 
     // check for span low than the screen
     if (span < TFT_HEIGHT) {
@@ -195,18 +199,19 @@ void makeScan() {
         tftmax = cv + TFTH_12;
     }
 
-    //~ // DEBUG
-    //~ Serial.println("Expanded to 240");
+    // DEBUG
+    #ifdef DEBUG
+        Serial.println("Expanded to 240");
 
-    // DEBUG
-    Serial.print("tftmin: ");
-    Serial.println(tftmin);
-    // DEBUG
-    Serial.print("tftmax: ");
-    Serial.println(tftmax);
-    // DEBUG
-    Serial.print("span: ");
-    Serial.println(span);
+        Serial.print("tftmin: ");
+        Serial.println(tftmin);
+
+        Serial.print("tftmax: ");
+        Serial.println(tftmax);
+
+        Serial.print("span: ");
+        Serial.println(span);
+    #endif
 
     //  clean screen and draw graphic
     drawbars(tftmin, tftmax, rspan);
@@ -235,12 +240,15 @@ void makeScan() {
         // prepare for next cycle
         lx = measure;
 
-        //~ // "freq;load"
-        //~ Serial.print(hs);
-        //~ Serial.print(";");
-        //~ Serial.print(dB);
-        //~ Serial.print(";");
-        //~ Serial.println(lx);
+        // DEBUG
+        #ifdef DEBUG
+            // "freq;load"
+            Serial.print(hs);
+            Serial.print(";");
+            Serial.print(dB);
+            Serial.print(";");
+            Serial.println(lx);
+        #endif
     }
 
     // print min max
@@ -305,16 +313,21 @@ void drawbars(long tftmin, long tftmax, word rspan) {
 
     for (int i = tftmin; i < tftmax; i++) {
         if ((abs(i) % step) == 0) {
-            //~ // DEBUG
-            //~ Serial.print("Value: ");
-            //~ Serial.println(i);
-
+            
+            // DEBUG
+            #ifdef DEBUG
+                Serial.print("Value: ");
+                Serial.println(i);
+            #endif
+            
             // set position
             int pos = map(i, tftmin, tftmax, 0, TFT_HEIGHT);
 
-            //~ // DEBUG
-            //~ Serial.print("Pos: ");
-            //~ Serial.println(pos);
+            // DEBUG
+            #ifdef DEBUG
+                Serial.print("Pos: ");
+                Serial.println(pos);
+            #endif
 
             // reuse a similar function to load the text
             minmaxSweepValue(i);
@@ -365,7 +378,7 @@ void makeScan2Flash(byte pos, bool write2flash) {
     if (write2flash == true) flashNext();
 
     word count = 0;
-    unsigned long f;
+    long f;
 
     // do the scan to flash
     for (f = scan_low; f < scan_high; f += sstep) {

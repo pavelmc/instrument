@@ -1,7 +1,7 @@
 /***************************************************
  * Multi-instrumento
  *
- * Author: M.Sc. Pavel Milanes Costa
+ * Author: Pavel Milanes Costa
  * Email: pavelmc@gmail.com
  ****************************************************/
 
@@ -11,7 +11,7 @@
  * In parameter f (Mhz) and l (nH) or C (pF)
  * Out the other L or C in nH or pF
  ******************************************************************************/
-unsigned long calcLorC(unsigned long f, long lorc) {
+unsigned long calcLorC(unsigned long f, unsigned long lorc) {
     // vars
     unsigned long ret;
     unsigned long f2;
@@ -82,7 +82,7 @@ void lcdUpdateC() {
 
 
 // get the actual cap value
-long getcap() {
+unsigned long getcap() {
     long resmult = 1;
     byte mult = cmult;
     while (mult--) {resmult *= 10;}
@@ -91,7 +91,7 @@ long getcap() {
     resmult *=  kcaps[cindex];
 
     // return
-    return resmult;
+    return long(resmult);
 }
 
 
@@ -123,7 +123,7 @@ void makeCCalcs() {
     // set it to center and +/- 1.5 Mhz
     scan_low  = minf - 1500000;               // -1.5 MHz
     scan_high = minf + 1500000;               // +1.5 MHz
-    sstep = 9375;                            // ~10 khz
+    sstep = 9375;                             // ~10 khz
 
     // make second scan
     makeScan2Flash(136, false);
@@ -138,7 +138,8 @@ void makeCCalcs() {
     tft.print(f);
 
     // now minf has the value, calc
-    long ind = calcLorC(minf, getcap);
+    unsigned long capt = getcap();
+    long ind = calcLorC(minf, capt);
 
     // reset the print buffers
     cleanPrintbuffer();
